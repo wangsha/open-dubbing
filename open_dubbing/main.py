@@ -20,6 +20,7 @@ from iso639 import Lang
 
 from open_dubbing.command_line import CommandLine
 from open_dubbing.dubbing import Dubber
+from open_dubbing.exit_code import ExitCode
 from open_dubbing.speech_to_text_faster_whisper import SpeechToTextFasterWhisper
 from open_dubbing.speech_to_text_whisper_transformers import (
     SpeechToTextWhisperTransfomers,
@@ -55,6 +56,11 @@ def _init_logging(log_level):
     logging.getLogger("pydub.converter").setLevel(logging.ERROR)
 
 
+def print_error_and_exit(msg: str, code: ExitCode):
+    print(msg, file=sys.stderr)
+    exit(code)
+
+
 def check_languages(source_language, target_language, _tts, translation, _sst):
     spt = _sst.get_languages()
     translation_languages = translation.get_language_pairs()
@@ -63,20 +69,17 @@ def check_languages(source_language, target_language, _tts, translation, _sst):
     tts = _tts.get_languages()
 
     if source_language not in spt:
-        raise ValueError(
-            f"source language '{source_language}' is not supported by the speech recognition system. Supported languages: '{spt}"
-        )
+        msg = f"source language '{source_language}' is not supported by the speech recognition system. Supported languages: '{spt}"
+        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_SPT)
 
     pair = (source_language, target_language)
     if pair not in translation_languages:
-        raise ValueError(
-            f"language pair '{pair}' is not supported by the translation system."
-        )
+        msg = f"language pair '{pair}' is not supported by the translation system."
+        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TRANS)
 
     if target_language not in tts:
-        raise ValueError(
-            f"target language '{target_language}' is not supported by the text to speech system. Supported languages: '{tts}"
-        )
+        msg = f"target language '{target_language}' is not supported by the text to speech system. Supported languages: '{tts}"
+        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TTS)
 
 
 _ACCEPTED_VIDEO_FORMATS = ["mp4"]
@@ -88,7 +91,8 @@ def check_is_a_video(input_file: str):
 
     if file_extension in _ACCEPTED_VIDEO_FORMATS:
         return
-    raise ValueError(f"Unsupported file format: {file_extension}")
+    msg = f"Unsupported file format: {file_extension}"
+    print_error_and_exit(msg, ExitCode.INVALID_FILEFORMAT)
 
 
 HUGGING_FACE_VARNAME = "HF_TOKEN"
@@ -97,10 +101,9 @@ HUGGING_FACE_VARNAME = "HF_TOKEN"
 def get_token(provided_token: str) -> str:
     token = provided_token or os.getenv(HUGGING_FACE_VARNAME)
     if not token:
-        raise ValueError(
-            f"You must either provide the '--hugging_face_token' argument or"
-            f" set the '{HUGGING_FACE_VARNAME.upper()}' environment variable."
-        )
+        msg = "You must either provide the '--hugging_face_token' argument or"
+        msg += f" set the '{HUGGING_FACE_VARNAME.upper()}' environment variable."
+        print_error_and_exit(msg, ExitCode.MISSING_HF_KEY)
     return token
 
 
@@ -126,6 +129,55 @@ def list_supported_languages(_tts, translation, device):  # TODO: Not used
     print(f"Supported target languages: {target}")
 
 
+def _get_selected_tts(selected_tts: str, tts_cli_cfg_file: str, device: str):
+    if selected_tts == "mms":
+        tts = TextToSpeechMMS(device)
+    elif selected_tts == "edge":
+        tts = TextToSpeechEdge(device)
+    elif selected_tts == "coqui":
+        try:
+            from open_dubbing.coqui import Coqui
+            from open_dubbing.text_to_speech_coqui import TextToSpeechCoqui
+        except Exception:
+            msg = "Make sure that Coqui-tts is installed by running 'pip install open-dubbing[coqui]'"
+            print_error_and_exit(msg, ExitCode.NO_COQUI_TTS)
+
+        tts = TextToSpeechCoqui(device)
+        if not Coqui.is_espeak_ng_installed():
+            msg = "To use Coqui-tts you have to have espeak or espeak-ng installed"
+            print_error_and_exit(msg, ExitCode.NO_COQUI_ESPEAK)
+    elif selected_tts == "cli":
+        if len(tts_cli_cfg_file) == 0:
+            msg = "When using the tts CLI you need to provide a configuration file which describes the commands and voices to use."
+            print_error_and_exit(msg, ExitCode.NO_CLI_CFG_FILE)
+
+        tts = TextToSpeechCLI(device, tts_cli_cfg_file)
+    else:
+        raise ValueError(f"Invalid tts value {selected_tts}")
+
+    return tts
+
+
+def _get_selected_translator(
+    translator: str, nllb_model: str, apertium_server: str, device: str
+):
+    if translator == "nllb":
+        translation = TranslationNLLB(device)
+        translation.load_model(nllb_model)
+    elif translator == "apertium":
+        server = apertium_server
+        if len(server) == 0:
+            msg = "When using Apertium's API, you need to specify with --apertium-server the URL of the server"
+            print_error_and_exit(msg, ExitCode.NO_APERTIUM_KEY)
+
+        translation = TranslationApertium(device)
+        translation.set_server(server)
+    else:
+        raise ValueError(f"Invalid translator value {translator}")
+
+    return translation
+
+
 def main():
 
     args = CommandLine.read_parameters()
@@ -136,35 +188,10 @@ def main():
     hugging_face_token = get_token(args.hugging_face_token)
 
     if not VideoProcessing.is_ffmpeg_installed():
-        raise ValueError("You need to have ffmpeg (which includes ffprobe) installed.")
+        msg = "You need to have ffmpeg (which includes ffprobe) installed."
+        print_error_and_exit(msg, ExitCode.NO_FFMPEG)
 
-    if args.tts == "mms":
-        tts = TextToSpeechMMS(args.device)
-    elif args.tts == "edge":
-        tts = TextToSpeechEdge(args.device)
-    elif args.tts == "coqui":
-        try:
-            from open_dubbing.coqui import Coqui
-            from open_dubbing.text_to_speech_coqui import TextToSpeechCoqui
-        except Exception:
-            raise ValueError(
-                "Make sure that Coqui-tts is installed by running 'pip install open-dubbing[coqui]'"
-            )
-
-        tts = TextToSpeechCoqui(args.device)
-        if not Coqui.is_espeak_ng_installed():
-            raise ValueError(
-                "To use Coqui-tts you have to have espeak or espeak-ng installed"
-            )
-    elif args.tts == "cli":
-        if len(args.tts_cli_cfg_file) == 0:
-            raise ValueError(
-                "When using the tts CLI you need to provide a configuration file which describes the commands and voices to use."
-            )
-
-        tts = TextToSpeechCLI(args.device, args.tts_cli_cfg_file)
-    else:
-        raise ValueError(f"Invalid tts value {args.tts}")
+    tts = _get_selected_tts(args.tts, args.tts_cli_cfg_file, args.device)
 
     if sys.platform == "darwin":
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -201,20 +228,9 @@ def main():
         source_language = stt.detect_language(args.input_file)
         logging.info(f"Detected language '{source_language}'")
 
-    if args.translator == "nllb":
-        translation = TranslationNLLB(args.device)
-        translation.load_model(args.nllb_model)
-    elif args.translator == "apertium":
-        server = args.apertium_server
-        if len(server) == 0:
-            raise ValueError(
-                "When using Apertium's API, you need to specify with --apertium-server the URL of the server"
-            )
-
-        translation = TranslationApertium(args.device)
-        translation.set_server(server)
-    else:
-        raise ValueError(f"Invalid translator value {args.translator}")
+    translation = _get_selected_translator(
+        args.translator, args.nllb_model, args.apertium_server, args.device
+    )
 
     check_languages(source_language, args.target_language, tts, translation, stt)
 
