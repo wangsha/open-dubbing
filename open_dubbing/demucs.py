@@ -16,6 +16,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 
 
 class Demucs:
@@ -65,7 +66,7 @@ class Demucs:
         if int24 and float32:
             raise ValueError("Cannot set both int24 and float32 to True.")
         command_parts = [
-            "python",
+            sys.executable,
             "-m",
             "demucs.separate",
             "-o",
