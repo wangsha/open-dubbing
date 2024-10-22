@@ -246,7 +246,7 @@ class TextToSpeech(ABC):
         """
 
         dubbed_audio = AudioSegment.from_file(dubbed_file)
-        logging.info(
+        logging.debug(
             "Adjusting audio speed will prevent overlaps of utterances. However,"
             " it might change the voice sligthly."
         )
