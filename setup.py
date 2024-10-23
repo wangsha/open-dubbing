@@ -27,7 +27,7 @@ setup(
     description="AI dubbing system which uses machine learning models to automatically translate and synchronize audio dialogue into different languages.",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/jordimas/open-dubbing",
+    url="https://github.com/Softcatala/open-dubbing",
     author="Jordi Mas",
     author_email="jmas@softcatala.org",
     license="Apache Software License 2.0",
