@@ -25,6 +25,7 @@ from open_dubbing.speech_to_text_faster_whisper import SpeechToTextFasterWhisper
 from open_dubbing.speech_to_text_whisper_transformers import (
     SpeechToTextWhisperTransfomers,
 )
+from open_dubbing.text_to_speech_api import TextToSpeechAPI
 from open_dubbing.text_to_speech_cli import TextToSpeechCLI
 from open_dubbing.text_to_speech_edge import TextToSpeechEdge
 from open_dubbing.text_to_speech_mms import TextToSpeechMMS
@@ -129,7 +130,9 @@ def list_supported_languages(_tts, translation, device):  # TODO: Not used
     print(f"Supported target languages: {target}")
 
 
-def _get_selected_tts(selected_tts: str, tts_cli_cfg_file: str, device: str):
+def _get_selected_tts(
+    selected_tts: str, tts_cli_cfg_file: str, tts_api_server: str, device: str
+):
     if selected_tts == "mms":
         tts = TextToSpeechMMS(device)
     elif selected_tts == "edge":
@@ -152,6 +155,12 @@ def _get_selected_tts(selected_tts: str, tts_cli_cfg_file: str, device: str):
             print_error_and_exit(msg, ExitCode.NO_CLI_CFG_FILE)
 
         tts = TextToSpeechCLI(device, tts_cli_cfg_file)
+    elif selected_tts == "api":
+        tts = TextToSpeechAPI(device, tts_api_server)
+        if len(tts_api_server) == 0:
+            msg = "When using TTS's API, you need to specify with --tts-api-server the URL of the server"
+            print_error_and_exit(msg, ExitCode.NO_TTS_API_SERVER)
+
     else:
         raise ValueError(f"Invalid tts value {selected_tts}")
 
@@ -191,7 +200,9 @@ def main():
         msg = "You need to have ffmpeg (which includes ffprobe) installed."
         print_error_and_exit(msg, ExitCode.NO_FFMPEG)
 
-    tts = _get_selected_tts(args.tts, args.tts_cli_cfg_file, args.device)
+    tts = _get_selected_tts(
+        args.tts, args.tts_cli_cfg_file, args.tts_api_server, args.device
+    )
 
     if sys.platform == "darwin":
         os.environ["TOKENIZERS_PARALLELISM"] = "false"

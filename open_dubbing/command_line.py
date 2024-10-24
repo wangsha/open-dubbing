@@ -56,13 +56,14 @@ class CommandLine:
             "--tts",
             type=str,
             default="mms",
-            choices=["mms", "coqui", "edge", "cli"],
+            choices=["mms", "coqui", "edge", "cli", "api"],
             help=(
                 "Text to Speech engine to use. Choices are:"
                 "'mms': Meta Multilingual Speech engine, supports many languages."
                 "'coqui': Coqui TTS, an open-source alternative for high-quality TTS."
                 "'edge': Microsoft Edge TSS."
                 "'cli': User defined TTS invoked from command line"
+                "'api': Implements a user defined TTS API contract to enable non supported TTS"
             ),
         )
         parser.add_argument(
@@ -146,6 +147,12 @@ class CommandLine:
             default="INFO",
             choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
             help="Set the logging level",
+        )
+        parser.add_argument(
+            "--tts-api-server",
+            type=str,
+            default="",
+            help=("TTS api server URL when using the 'API' tts"),
         )
 
         return parser.parse_args()
