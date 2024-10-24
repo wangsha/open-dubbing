@@ -168,7 +168,7 @@ def _get_selected_translator(
         server = apertium_server
         if len(server) == 0:
             msg = "When using Apertium's API, you need to specify with --apertium-server the URL of the server"
-            print_error_and_exit(msg, ExitCode.NO_APERTIUM_KEY)
+            print_error_and_exit(msg, ExitCode.NO_APERTIUM_SERVER)
 
         translation = TranslationApertium(device)
         translation.set_server(server)

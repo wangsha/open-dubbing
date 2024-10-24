@@ -25,4 +25,4 @@ class ExitCode(IntEnum):
     NO_COQUI_TTS = 106
     NO_COQUI_ESPEAK = 107
     NO_CLI_CFG_FILE = 108
-    NO_APERTIUM_KEY = 109
+    NO_APERTIUM_SERVER = 109
