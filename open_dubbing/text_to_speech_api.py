@@ -76,7 +76,7 @@ class TextToSpeechAPI(TextToSpeech):
     ) -> str:
 
         url = urljoin(self.server, "/speak")
-        url = f"{url}?&voice={assigned_voice}&text={text}"
+        url = f"{url}?voice={assigned_voice}&text={text}"
         response = requests.get(url)
 
         temp_filename = None
@@ -87,10 +87,8 @@ class TextToSpeechAPI(TextToSpeech):
                 with open(temp_filename, "wb") as f:
                     f.write(response.content)
             else:
-                print(
-                    logging.error(
-                        f"Failed to download the file. Status code: {response.status_code}"
-                    )
+                logging.error(
+                    f"Failed to download the file. Status code: {response.status_code}"
                 )
 
             self._convert_to_mp3(temp_filename, output_filename)

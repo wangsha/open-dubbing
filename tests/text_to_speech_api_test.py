@@ -77,7 +77,7 @@ class TestTextToSpeechAPI:
 
         # Ensure requests.get was called with the correct URL
         expected_url = (
-            "http://dummyserver.com/speak?&voice=test_voice&text=Hello, world!"
+            "http://dummyserver.com/speak?voice=test_voice&text=Hello, world!"
         )
         mock_requests_get.assert_called_once_with(expected_url)
         assert mock_convert_to_mp3.called
