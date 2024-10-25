@@ -13,9 +13,10 @@ At the moment, it is pure *experimental* and an excuse to help me to understand 
 
 * Build on top of open source models and able to run it locally
 * Dubs automatically a video from a source to a target language
-* Supports multiple Text To Speech (TTS) engines (Coqui, MMS, etc)
+* Supports multiple Text To Speech (TTS): Coqui, MMS, Edge
+ * Allows to use any non-supported one by configuring an API or CLI
 * Gender voice detection to allow to assign properly synthetic voice
-* Support for multiple translation engines (NLLB, Apertium, etc)
+* Support for multiple translation engines (Meta's NLLB, Apertium API, etc)
 * Automatic detection of the source language of the video (using Whisper)
 
 # Roadmap
@@ -52,7 +53,6 @@ The support languages depends on the combination of text to speech, translation 
 Supported source languages: Afrikaans, Amharic, Armenian, Assamese, Bashkir, Basque, Belarusian, Bengali, Bosnian, Bulgarian, Burmese, Catalan, Chinese, Croatian, Czech, Danish, Dutch, English, Estonian, Faroese, Finnish, French, Galician, Georgian, German, Gujarati, Haitian, Hausa, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Javanese, Kannada, Kazakh, Khmer, Korean, Lao, Lingala, Lithuanian, Luxembourgish, Macedonian, Malayalam, Maltese, Maori, Marathi, Modern Greek (1453-), Norwegian Nynorsk, Occitan (post 1500), Panjabi, Polish, Portuguese, Romanian, Russian, Sanskrit, Serbian, Shona, Sindhi, Sinhala, Slovak, Slovenian, Somali, Spanish, Sundanese, Swedish, Tagalog, Tajik, Tamil, Tatar, Telugu, Thai, Tibetan, Turkish, Turkmen, Ukrainian, Urdu, Vietnamese, Welsh, Yoruba, Yue Chinese
 
 Supported target languages: Achinese, Akan, Amharic, Assamese, Awadhi, Ayacucho Quechua, Balinese, Bambara, Bashkir, Basque, Bemba (Zambia), Bengali, Bulgarian, Burmese, Catalan, Cebuano, Central Aymara, Chhattisgarhi, Crimean Tatar, Dutch, Dyula, Dzongkha, English, Ewe, Faroese, Fijian, Finnish, Fon, French, Ganda, German, Guarani, Gujarati, Haitian, Hausa, Hebrew, Hindi, Hungarian, Icelandic, Iloko, Indonesian, Javanese, Kabiyè, Kabyle, Kachin, Kannada, Kazakh, Khmer, Kikuyu, Kinyarwanda, Kirghiz, Korean, Lao, Magahi, Maithili, Malayalam, Marathi, Minangkabau, Modern Greek (1453-), Mossi, North Azerbaijani, Northern Kurdish, Nuer, Nyanja, Odia, Pangasinan, Panjabi, Papiamento, Polish, Portuguese, Romanian, Rundi, Russian, Samoan, Sango, Shan, Shona, Somali, South Azerbaijani, Southwestern Dinka, Spanish, Sundanese, Swahili (individual language), Swedish, Tagalog, Tajik, Tamasheq, Tamil, Tatar, Telugu, Thai, Tibetan, Tigrinya, Tok Pisin, Tsonga, Turkish, Turkmen, Uighur, Ukrainian, Urdu, Vietnamese, Waray (Philippines), Welsh, Yoruba
-
 
 # Installation
 
@@ -101,7 +101,6 @@ brew install espeak-ng
 Windows currently works but it has not been tested extensively.
 
 You also need to install [ffmpeg](https://www.ffmpeg.org/download.html) for Windows. Make sure that is the system path.
-
 
 ## Accept pyannote license
 
