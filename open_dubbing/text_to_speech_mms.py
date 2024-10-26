@@ -42,9 +42,7 @@ class TextToSpeechMMS(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
 
         logging.debug(f"TextToSpeechMMS._convert_text_to_speech: {text}")

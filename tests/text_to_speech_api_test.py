@@ -70,9 +70,7 @@ class TestTextToSpeechAPI:
             target_language="en",
             output_filename=output_filename,
             text="Hello, world!",
-            pitch=1.0,
             speed=1.0,
-            volume_gain_db=0.0,
         )
 
         # Ensure requests.get was called with the correct URL

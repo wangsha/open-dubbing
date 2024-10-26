@@ -39,7 +39,6 @@ class TextToSpeech(ABC):
         self._SSML_MALE: Final[str] = "Male"
         self._SSML_FEMALE: Final[str] = "Female"
         self._DEFAULT_SPEED: Final[float] = 1.0
-        self._DEFAULT_VOLUME_GAIN_DB: Final[float] = 16.0
 
     @abstractmethod
     def get_available_voices(self, language_code: str) -> List[Voice]:
@@ -106,9 +105,7 @@ class TextToSpeech(ABC):
         """Updates utterance metadata with Text-To-Speech properties."""
         utterance_metadata_copy = utterance_metadata.copy()
         voice_properties = dict(
-            pitch=0,
             speed=self._DEFAULT_SPEED,
-            volume_gain_db=self._DEFAULT_VOLUME_GAIN_DB,
         )
         utterance_metadata_copy.update(voice_properties)
         return utterance_metadata_copy
@@ -145,9 +142,7 @@ class TextToSpeech(ABC):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
 
         dubbed_file = self._convert_text_to_speech(
@@ -155,9 +150,7 @@ class TextToSpeech(ABC):
             target_language=target_language,
             output_filename=output_filename,
             text=text,
-            pitch=pitch,
             speed=speed,
-            volume_gain_db=volume_gain_db,
         )
 
         dubbed_audio = AudioSegment.from_file(dubbed_file)
@@ -193,9 +186,7 @@ class TextToSpeech(ABC):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
         pass
 
@@ -350,9 +341,7 @@ class TextToSpeech(ABC):
                     target_language=target_language,
                     output_filename=output_filename,
                     text=text,
-                    pitch=utterance_copy["pitch"],
                     speed=speed,
-                    volume_gain_db=utterance_copy["volume_gain_db"],
                 )
                 assigned_voice = utterance_copy.get("assigned_voice", None)
                 assigned_voice = assigned_voice if assigned_voice else ""
@@ -401,9 +390,7 @@ class TextToSpeech(ABC):
                             target_language=target_language,
                             output_filename=output_filename,
                             text=text,
-                            pitch=utterance_copy["pitch"],
                             speed=speed,
-                            volume_gain_db=utterance_copy["volume_gain_db"],
                         )
                     else:
                         chunk_size = utterance_copy.get(

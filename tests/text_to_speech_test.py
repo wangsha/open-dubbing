@@ -34,9 +34,7 @@ class TextToSpeechUT(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
         pass
 
@@ -47,9 +45,7 @@ class TextToSpeechUT(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
         pass
 
@@ -123,9 +119,7 @@ class TestTextToSpeech:
                 "start": 0,
                 "end": 5,
                 "translated_text": "Hello world",
-                "pitch": 1.0,
                 "speed": 1.0,  # Initially set speed to 1.0
-                "volume_gain_db": 0.0,
                 "path": "some/path/file.mp3",
             }
         ]

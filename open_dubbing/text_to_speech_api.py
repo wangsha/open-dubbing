@@ -70,9 +70,7 @@ class TextToSpeechAPI(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
 
         url = urljoin(self.server, "/speak")

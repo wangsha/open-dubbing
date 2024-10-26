@@ -61,9 +61,7 @@ class TextToSpeechCoqui(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
 
         wav_file = output_filename.replace(".mp3", ".wav")

@@ -80,9 +80,7 @@ class TextToSpeechCLI(TextToSpeech):
         target_language: str,
         output_filename: str,
         text: str,
-        pitch: float,
         speed: float,
-        volume_gain_db: float,
     ) -> str:
 
         cmd = self._get_command(
