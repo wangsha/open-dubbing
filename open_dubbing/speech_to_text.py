@@ -99,6 +99,9 @@ class SpeechToText(ABC):
                         vocals_filepath=path,
                         source_language_iso_639_1=iso_639_1,
                     )
+                    transcribed_text = (
+                        transcribed_text.strip()
+                    )  # Whisper sometimes includes spaces at the begining of sentences
             except Exception as e:
                 logging.error(
                     f"speech_to_text.transcribe_audio_chunks. file '{path}', error: '{e}'"
