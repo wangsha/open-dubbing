@@ -79,6 +79,9 @@ class AgeGenderModel(Wav2Vec2PreTrainedModel):
 
 class VoiceGenderClassifier:
 
+    FEMALE = "Female"
+    MALE = "Male"
+
     def __init__(self, device="cpu"):
         self.device = device
         # Load model from hub
@@ -142,7 +145,7 @@ class VoiceGenderClassifier:
         ]  # Take the first two logits (female, male)
 
         # Gender labels with only male and female
-        gender_labels = ["Female", "Male"]
+        gender_labels = [self.FEMALE, self.MALE]
 
         # Find the index with the highest probability between female and male
         predicted_gender_idx = torch.argmax(male_female_logits, dim=1).item()
@@ -152,11 +155,18 @@ class VoiceGenderClassifier:
         return gender_labels[predicted_gender_idx]
 
     def get_gender_for_file(self, file_path):
-        signal, sampling_rate = self.load_audio_file(file_path)
+        try:
+            signal, sampling_rate = self.load_audio_file(file_path)
 
-        # Predict age and gender
-        _, gender_logits = self._predict(signal, sampling_rate)
-        predicted_gender = self._interpret_gender(gender_logits)
+            # Predict age and gender
+            _, gender_logits = self._predict(signal, sampling_rate)
+            predicted_gender = self._interpret_gender(gender_logits)
+        except Exception as e:
+            logging.error(
+                f"voice_gender_classifier. get_gender_for_file. Error '{e}' processing {file_path}"
+            )
+            predicted_gender = self.FEMALE
+
         logging.debug(
             f"The audio from {os.path.basename(file_path)} is predicted {predicted_gender}"
         )
