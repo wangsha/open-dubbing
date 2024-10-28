@@ -113,7 +113,6 @@ You also need to install [ffmpeg](https://www.ffmpeg.org/download.html) for Wind
 Quick start
 
 ```shell
-
  open-dubbing --input_file video.mp4 --target_language=cat --hugging_face_token=TOKEN
 ```
 
@@ -127,7 +126,44 @@ To get a list of available options:
 
 ```shell
 open-dubbing --help
+
 ```
+# Post editing automatic generated dubbed files
+
+There are cases where you want to manually adjust the text generated for dubbing, the voice used or other aspects.
+
+After you have executed _open-dubbing_ you have the intermediate files and the outcome dubbed file in the selected output directory.
+
+You can edit the file _utterance_metadata_XXX.json_ (where XXX is your language code), make manual adjustments, and generate the video again.
+
+```json
+    "utterances": [
+        {
+            "start": 7.607843750000001,
+            "end": 8.687843750000003,
+            "speaker_id": "SPEAKER_00",
+            "path": "short/chunk_7.607843750000001_8.687843750000003.mp3",
+            "text": "And I love this city.",
+            "for_dubbing": true,
+            "gender": "Male",
+            "translated_text": **"I m'encanta aquesta ciutat."**,
+            "assigned_voice": "ca-ES-EnricNeural",
+            "speed": 1.3,
+            "dubbed_path": "short/dubbed_chunk_7.607843750000001_8.687843750000003.mp3",
+            "hash": "b11d7f0e2aa5475e652937469d89ef0a178fecea726f076095942d552944089f"
+        },
+        ...
+```
+
+Imagine that you have changed the **translated_text**. To generated the post-edited video:
+
+```shell
+ open-dubbing --input_file video.mp4 --target_language=cat --hugging_face_token=TOKEN --update
+```
+
+The _update_ parameter changes the behavior of _open-dubbing_ and instead of producing a full dubbing it rebuilds the already existing dubbing incorporating any change made into the JSON file.
+
+Fields that are usefull to modify are: translated_text, gender (of the voice) or speed.
 
 # Documentation
 

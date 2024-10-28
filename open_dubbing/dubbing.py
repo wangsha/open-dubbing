@@ -14,13 +14,11 @@
 
 import dataclasses
 import functools
-import json
 import logging
 import os
 import re
 import shutil
 import sys
-import tempfile
 import time
 
 from typing import Final
@@ -32,33 +30,17 @@ from pyannote.audio import Pipeline
 
 from open_dubbing import audio_processing
 from open_dubbing.demucs import Demucs
+from open_dubbing.preprocessing import PreprocessingArtifacts
 from open_dubbing.speech_to_text import SpeechToText
 from open_dubbing.text_to_speech import TextToSpeech
 from open_dubbing.translation import Translation
+from open_dubbing.utterance import Utterance
 from open_dubbing.video_processing import VideoProcessing
 
 _UTTERNACE_METADATA_FILE_NAME: Final[str] = "utterance_metadata"
 
 _DEFAULT_PYANNOTE_MODEL: Final[str] = "pyannote/speaker-diarization-3.1"
 _NUMBER_OF_STEPS: Final[int] = 7
-
-
-@dataclasses.dataclass
-class PreprocessingArtifacts:
-    """Instance with preprocessing outputs.
-
-    Attributes:
-        video_file: A path to a video ad with no audio.
-        audio_file: A path to an audio track from the ad.
-        audio_vocals_file: A path to an audio track with vocals only.
-        audio_background_file: A path to and audio track from the ad with removed
-          vocals.
-    """
-
-    video_file: str | None
-    audio_file: str
-    audio_vocals_file: str | None = None
-    audio_background_file: str | None = None
 
 
 @dataclasses.dataclass
@@ -121,7 +103,7 @@ class Dubber:
         stt: SpeechToText,
         device: str,
         cpu_threads: int = 0,
-        keep_intermediate_files: bool = False,
+        clean_intermediate_files: bool = False,
         pyannote_model: str = _DEFAULT_PYANNOTE_MODEL,
         number_of_steps: int = _NUMBER_OF_STEPS,
     ) -> None:
@@ -139,7 +121,8 @@ class Dubber:
         self.stt = stt
         self.device = device
         self.cpu_threads = cpu_threads
-        self.keep_intermediate_files = keep_intermediate_files
+        self.clean_intermediate_files = clean_intermediate_files
+        self.preprocesing_output = None
 
         if cpu_threads > 0:
             torch.set_num_threads(cpu_threads)
@@ -297,7 +280,7 @@ class Dubber:
         )
 
     def run_cleaning(self) -> None:
-        if self.keep_intermediate_files:
+        if not self.clean_intermediate_files:
             return
 
         output_directory = None
@@ -360,38 +343,58 @@ class Dubber:
             video_file=dubbed_video_file,
         )
 
-    def run_save_utterance_metadata(self) -> None:
-        """Saves a Python dictionary to a JSON file.
+    def update(self):
+        times = {}
+        start_time = time.time()
+        task_start_time = time.time()
 
-        Returns:
-          A path to the saved uttterance metadata.
-        """
-        target_language_suffix = "_" + self.target_language.replace("-", "_").lower()
-        utterance_metadata_file = os.path.join(
-            self.output_directory,
-            _UTTERNACE_METADATA_FILE_NAME + target_language_suffix + ".json",
+        utterance = Utterance(self.target_language, self.output_directory)
+        self.utterance_metadata, self.preprocesing_output = (
+            utterance.load_utterances_json()
         )
-        try:
-            all_data = {}
-            all_data["utterances"] = self.utterance_metadata
-            all_data["source_language"] = self.source_language
-            json_data = json.dumps(all_data, ensure_ascii=False, indent=4)
-            with tempfile.NamedTemporaryFile(
-                mode="w", delete=False, encoding="utf-8"
-            ) as temporary_file:
 
-                temporary_file.write(json_data)
-                temporary_file.flush()
-                os.fsync(temporary_file.fileno())
-            shutil.copy(temporary_file.name, utterance_metadata_file)
-            os.remove(temporary_file.name)
-            logging.debug(
-                "Utterance metadata saved successfully to"
-                f" '{utterance_metadata_file}'"
-            )
-        except Exception as e:
-            logging.warning(f"Error saving utterance metadata: {e}")
-        self.save_utterance_metadata_output = utterance_metadata_file
+        # Update voices in case they have changed
+        modified_utterances = utterance._get_modified_utterances(
+            self.utterance_metadata
+        )
+
+        assigned_voices = self.tts.assign_voices(
+            utterance_metadata=modified_utterances,
+            target_language=self.target_language,
+            target_language_region=self.target_language_region,
+        )
+
+        modified_utterances = self.tts.update_utterance_metadata(
+            utterance_metadata=modified_utterances,
+            assigned_voices=assigned_voices,
+        )
+
+        self.tts.dub_utterances(
+            utterance_metadata=modified_utterances,
+            output_directory=self.output_directory,
+            target_language=self.target_language,
+            adjust_speed=True,
+        )
+        times["tts"] = self.log_debug_task_and_getime(
+            "Text to speech completed", task_start_time
+        )
+
+        task_start_time = time.time()
+        self.run_postprocessing()
+        self.run_cleaning()
+        times["postprocessing"] = self.log_debug_task_and_getime(
+            "Post processing completed", task_start_time
+        )
+        logging.info("Dubbing process finished.")
+        total_time = time.time() - start_time
+        logging.info(f"Total execution time: {total_time:.2f} secs")
+        for task in times:
+            _time = times[task]
+            per = _time * 100 / total_time
+            logging.info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
+
+        self.log_maxrss_memory()
+        logging.info("Output files saved in: %s.", self.output_directory)
 
     def dub(self) -> PostprocessingArtifacts:
         """Orchestrates the entire dubbing process."""
@@ -411,8 +414,8 @@ class Dubber:
         times["stt"] = self.log_debug_task_and_getime(
             "Speech to text completed", task_start_time
         )
-
         task_start_time = time.time()
+
         self.run_translation()
         times["translation"] = self.log_debug_task_and_getime(
             "Translation completed", task_start_time
@@ -426,7 +429,13 @@ class Dubber:
         )
 
         task_start_time = time.time()
-        self.run_save_utterance_metadata()
+
+        Utterance(self.target_language, self.output_directory).save_utterances(
+            utterance_metadata=self.utterance_metadata,
+            preprocesing_output=self.preprocesing_output,
+            source_language=self.source_language,
+        )
+
         self.run_postprocessing()
         self.run_cleaning()
         times["postprocessing"] = self.log_debug_task_and_getime(

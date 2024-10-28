@@ -110,9 +110,9 @@ class CommandLine:
             help="number of threads used for CPU inference (if is not specified uses defaults for each framework)",
         )
         parser.add_argument(
-            "--keep-intermediate-files",
+            "--clean-intermediate-files",
             action="store_true",
-            help="keep intermediate files used during the dubbing process",
+            help="clean intermediate files used during the dubbing process",
         )
 
         parser.add_argument(
@@ -153,6 +153,11 @@ class CommandLine:
             type=str,
             default="",
             help=("TTS api server URL when using the 'API' tts"),
+        )
+        parser.add_argument(
+            "--update",
+            action="store_true",
+            help="Update the dubbed video produced by a previous execution with the latest changes in utterance_metadata file",
         )
 
         return parser.parse_args()
