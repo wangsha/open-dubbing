@@ -130,11 +130,13 @@ open-dubbing --help
 ```
 # Post editing automatic generated dubbed files
 
-There are cases where you want to manually adjust the text generated for dubbing, the voice used or other aspects.
+There are cases where you want to manually adjust the text generated automatically for dubbing, the voice used or the timings.
 
 After you have executed _open-dubbing_ you have the intermediate files and the outcome dubbed file in the selected output directory.
 
-You can edit the file _utterance_metadata_XXX.json_ (where XXX is your language code), make manual adjustments, and generate the video again.
+You can edit the file _utterance_metadata_XXX.json_ (where XXX is the target language code), make manual adjustments, and generate the video again.
+
+See an example JSON:
 
 ```json
     "utterances": [
@@ -152,7 +154,6 @@ You can edit the file _utterance_metadata_XXX.json_ (where XXX is your language 
             "dubbed_path": "short/dubbed_chunk_7.607843750000001_8.687843750000003.mp3",
             "hash": "b11d7f0e2aa5475e652937469d89ef0a178fecea726f076095942d552944089f"
         },
-        ...
 ```
 
 Imagine that you have changed the **translated_text**. To generated the post-edited video:

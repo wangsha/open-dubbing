@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.0]
+
+### Added
+- Support for manually postediting the automatically dubbing (--update)
+- Support for Whisper large-v2 model (better than v3 for some languages)
+
+### Fixed
+- Do not need to merge back audios that have not been dubbed
+- If a file merge file fails, do not fail the whole batch
+
 ## [0.0.9]
 
 ### Added
