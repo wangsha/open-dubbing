@@ -3,11 +3,11 @@
 Executing _open-dubbing  --help_ produces the following output:
 
 ```text
-usage: open-dubbing [-h] --input_file INPUT_FILE [--output_directory OUTPUT_DIRECTORY] [--source_language SOURCE_LANGUAGE] --target_language
-                    TARGET_LANGUAGE [--hugging_face_token HUGGING_FACE_TOKEN] [--tts {mms,coqui,edge,cli}] [--stt {auto,faster-whisper,transformers}]
-                    [--translator {nllb,apertium}] [--apertium-server APERTIUM_SERVER] [--device {cpu,cuda}] [--cpu_threads CPU_THREADS] [--debug]
-                    [--nllb_model {nllb-200-1.3B,nllb-200-3.3B}] [--whisper_model {medium,large-v3}] [--target_language_region TARGET_LANGUAGE_REGION]
-                    [--tts_cli_cfg_file TTS_CLI_CFG_FILE]
+usage: open-dubbing [-h] --input_file INPUT_FILE [--output_directory OUTPUT_DIRECTORY] [--source_language SOURCE_LANGUAGE] --target_language TARGET_LANGUAGE
+                    [--hugging_face_token HUGGING_FACE_TOKEN] [--tts {mms,coqui,edge,cli,api}] [--stt {auto,faster-whisper,transformers}] [--translator {nllb,apertium}]
+                    [--apertium-server APERTIUM_SERVER] [--device {cpu,cuda}] [--cpu_threads CPU_THREADS] [--clean-intermediate-files] [--nllb_model {nllb-200-1.3B,nllb-200-3.3B}]
+                    [--whisper_model {medium,large-v2,large-v3}] [--target_language_region TARGET_LANGUAGE_REGION] [--tts_cli_cfg_file TTS_CLI_CFG_FILE]
+                    [--log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--tts-api-server TTS_API_SERVER] [--update]
 
 AI dubbing system which uses machine learning models to automatically translate and synchronize audio dialogue into different languages
 
@@ -24,12 +24,12 @@ options:
   --hugging_face_token HUGGING_FACE_TOKEN
                         Hugging Face API token.
   --tts {mms,coqui,edge,cli,api}
-                        Text to Speech engine to use. Choices are:'mms': Meta Multilingual Speech engine, supports many languages.'coqui': Coqui TTS, an open-source
-                        alternative for high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined
-                        TTS API contract to enable non supported TTS
+                        Text to Speech engine to use. Choices are:'mms': Meta Multilingual Speech engine, supports many languages.'coqui': Coqui TTS, an open-source alternative for
+                        high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined TTS API contract to enable non
+                        supported TTS
   --stt {auto,faster-whisper,transformers}
-                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper
-                        implementation.'transformers': Transformers OpenAI whisper implementation.
+                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper implementation.'transformers':
+                        Transformers OpenAI whisper implementation.
   --translator {nllb,apertium}
                         Text to Speech engine to use. Choices are:'nllb': Meta's no Language Left Behind (NLLB).'apertium'': Apertium compatible API server
   --apertium-server APERTIUM_SERVER
@@ -37,11 +37,11 @@ options:
   --device {cpu,cuda}   Device to use
   --cpu_threads CPU_THREADS
                         number of threads used for CPU inference (if is not specified uses defaults for each framework)
-  --keep-intermediate-files
-                        keep intermediate files used during the dubbing process
+  --clean-intermediate-files
+                        clean intermediate files used during the dubbing process
   --nllb_model {nllb-200-1.3B,nllb-200-3.3B}
                         NLLB translation model size. 'nllb-200-3.3B' gives best translation quality and 'nllb-200-1.3B' is the fastest
-  --whisper_model {medium,large-v3}
+  --whisper_model {medium,large-v2,large-v3}
                         name of the OpenAI Whisper speech to text model size to use
   --target_language_region TARGET_LANGUAGE_REGION
                         For some TTS you can specify the region of the language. For example, 'ES' will indicate accent from Spain.
@@ -51,6 +51,8 @@ options:
                         Set the logging level
   --tts-api-server TTS_API_SERVER
                         TTS api server URL when using the 'API' tts
+  --update              Update the dubbed video produced by a previous execution with the latest changes in utterance_metadata file
+
 ```
 
 # How it works
