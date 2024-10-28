@@ -129,7 +129,7 @@ class TestAddSpeakerInfo:
                 "start": 0.0,
                 "end": 1.0,
                 "speaker_id": "speaker1",
-                "ssml_gender": "male",
+                "gender": "male",
                 "path": "path/to/file.mp3",
             },
             {
@@ -137,7 +137,7 @@ class TestAddSpeakerInfo:
                 "start": 1.0,
                 "end": 2.0,
                 "speaker_id": "speaker2",
-                "ssml_gender": "female",
+                "gender": "female",
                 "path": "path/to/file.mp3",
             },
         ]

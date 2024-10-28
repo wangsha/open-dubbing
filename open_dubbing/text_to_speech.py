@@ -81,7 +81,7 @@ class TextToSpeech(ABC):
                 if speaker_id in voice_assignment:
                     continue
 
-                gender = chunk["ssml_gender"]
+                gender = chunk["gender"]
                 for voice in voices:
                     if voice.gender.lower() == gender.lower():
                         voice_assignment[speaker_id] = voice.name

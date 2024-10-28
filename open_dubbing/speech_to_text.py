@@ -180,12 +180,10 @@ class SpeechToText(ABC):
                 " same."
             )
         updated_utterance_metadata = []
-        for utterance, (speaker_id, ssml_gender) in zip(
-            utterance_metadata, speaker_info
-        ):
+        for utterance, (speaker_id, gender) in zip(utterance_metadata, speaker_info):
             new_utterance = utterance.copy()
             new_utterance["speaker_id"] = speaker_id
-            new_utterance["ssml_gender"] = ssml_gender
+            new_utterance["gender"] = gender
             updated_utterance_metadata.append(new_utterance)
         return updated_utterance_metadata
 
