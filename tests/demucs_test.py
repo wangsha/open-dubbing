@@ -46,24 +46,6 @@ class TestBuildDemucsCommand:
                 ),
             ),
             (
-                "int24",
-                {"int24": True, "mp3": False},
-                (
-                    'python -m demucs.separate -o "test" --device cpu --shifts 1'
-                    " --overlap 0.25 -j 0 --two-stems vocals --int24"
-                    ' "audio.mp3"'
-                ),
-            ),
-            (
-                "float32",
-                {"float32": True, "mp3": False},
-                (
-                    'python -m demucs.separate -o "test" --device cpu --shifts 1'
-                    " --overlap 0.25 -j 0 --two-stems vocals --float32"
-                    ' "audio.mp3"'
-                ),
-            ),
-            (
                 "segment",
                 {"segment": 60},
                 (
@@ -95,18 +77,6 @@ class TestBuildDemucsCommand:
             .endswith(expected_command)
         )
 
-    def test_raise_error_int24_float32(self):
-        with pytest.raises(
-            ValueError, match="Cannot set both int24 and float32 to True."
-        ):
-            Demucs().build_demucs_command(
-                audio_file="audio.mp3",
-                output_directory="test",
-                device="cpu",
-                int24=True,
-                float32=True,
-            )
-
 
 class TestExtractCommandInfo:
 
@@ -132,20 +102,6 @@ class TestExtractCommandInfo:
                 "results",
                 ".flac",
                 "audio",
-            ),
-            (
-                "WAV with Int24",
-                "python3 -m demucs.separate -o 'wav_output' --int24 'song.wav'",
-                "wav_output",
-                ".wav",
-                "song",
-            ),
-            (
-                "WAV with Float32",
-                "python3 -m demucs.separate -o 'float32_dir' --float32 'music.mp3'",
-                "float32_dir",
-                ".wav",
-                "music",
             ),
         ],
     )
@@ -180,18 +136,6 @@ class TestAssembleSplitAudioFilePaths:
                 "python3 -m demucs.separate -o 'out_flac' --flac \"audio.mp3\"",
                 "out_flac/htdemucs/audio/vocals.flac",
                 "out_flac/htdemucs/audio/no_vocals.flac",
-            ),
-            (
-                "WAV Output (int24)",
-                "python3 -m demucs.separate -o 'out_wav' --int24 \"audio.mp3\"",
-                "out_wav/htdemucs/audio/vocals.wav",
-                "out_wav/htdemucs/audio/no_vocals.wav",
-            ),
-            (
-                "WAV Output (float32)",
-                "python3 -m demucs.separate -o 'out_float32' --float32 \"audio.mp3\"",
-                "out_float32/htdemucs/audio/vocals.wav",
-                "out_float32/htdemucs/audio/no_vocals.wav",
             ),
         ],
     )

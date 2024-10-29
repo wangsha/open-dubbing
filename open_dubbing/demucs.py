@@ -34,8 +34,6 @@ class Demucs:
         jobs: int = 0,
         split: bool = True,
         segment: int | None = None,
-        int24: bool = False,
-        float32: bool = False,
         flac: bool = False,
         mp3: bool = True,
     ) -> str:
@@ -52,19 +50,13 @@ class Demucs:
             jobs: The number of jobs to run in parallel.
             split: Whether to split audio into chunks.
             segment: The split size for chunks (None for no splitting).
-            int24: Save WAV output as 24 bits.
-            float32: Save WAV output as float32.
             flac: Convert output to FLAC.
             mp3: Convert output to MP3.
 
         Returns:
             A string representing the constructed command.
 
-        Raises:
-            ValueError: If both int24 and float32 are set to True.
         """
-        if int24 and float32:
-            raise ValueError("Cannot set both int24 and float32 to True.")
         command_parts = [
             sys.executable,
             "-m",
@@ -97,10 +89,6 @@ class Demucs:
                     str(mp3_preset),
                 ]
             )
-        if int24:
-            command_parts.append("--int24")
-        if float32:
-            command_parts.append("--float32")
         command_parts.append(f'"{audio_file}"')
         return " ".join(command_parts)
 
@@ -152,12 +140,10 @@ class Demucs:
         folder_pattern = r"-o\s+(['\"]?)(.+?)\1"
         flac_pattern = r"--flac"
         mp3_pattern = r"--mp3"
-        int24_or_float32_pattern = r"--(int24|float32)"
         input_file_pattern = r"['\"]?(\w+\.\w+)['\"]?$|\s(\w+\.\w+)$"
         folder_match = re.search(folder_pattern, command)
         flac_match = re.search(flac_pattern, command)
         mp3_match = re.search(mp3_pattern, command)
-        int24_or_float32_match = re.search(int24_or_float32_pattern, command)
         input_file_match = re.search(input_file_pattern, command)
         output_directory = folder_match.group(2) if folder_match else ""
         input_file_name_with_ext = (
@@ -172,8 +158,6 @@ class Demucs:
             output_file_extension = ".flac"
         elif mp3_match:
             output_file_extension = ".mp3"
-        elif int24_or_float32_match:
-            output_file_extension = ".wav"
         else:
             output_file_extension = ".wav"
         return output_directory, output_file_extension, input_file_name_no_ext

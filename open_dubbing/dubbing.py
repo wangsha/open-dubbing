@@ -270,7 +270,7 @@ class Dubber:
         )
 
     def run_text_to_speech(self) -> None:
-        """Converts translated text to speech and dubs utterances with Google's Text-To-Speech."""
+        """Converts translated text to speech and dubs utterance"""
         self.utterance_metadata = self.tts.dub_utterances(
             utterance_metadata=self.utterance_metadata,
             output_directory=self.output_directory,

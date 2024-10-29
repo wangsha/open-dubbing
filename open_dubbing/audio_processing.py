@@ -26,8 +26,6 @@ from pydub import AudioSegment
 _DEFAULT_DUBBED_VOCALS_AUDIO_FILE: Final[str] = "dubbed_vocals.mp3"
 _DEFAULT_DUBBED_AUDIO_FILE: Final[str] = "dubbed_audio"
 _DEFAULT_OUTPUT_FORMAT: Final[str] = ".mp3"
-_SUPPORTED_DEVICES: Final[tuple[str, str]] = ("cpu", "cuda")
-_TIMESTAMP_THRESHOLD: Final[float] = 0.001
 
 
 def create_pyannote_timestamps(
@@ -42,11 +40,6 @@ def create_pyannote_timestamps(
         A list of dictionaries containing start and end timestamps for each
         speaker segment.
     """
-    if device not in _SUPPORTED_DEVICES:
-        raise ValueError(
-            "The device must be either (' or ').join(_SUPPORTED_DEVICES). Got:"
-            f" {device}"
-        )
     if device == "cuda":
         pipeline.to(torch.device("cuda"))
     diarization = pipeline(audio_file)
