@@ -57,8 +57,8 @@ def _init_logging(log_level):
     logging.getLogger("pydub.converter").setLevel(logging.ERROR)
 
 
-def print_error_and_exit(msg: str, code: ExitCode):
-    print(msg, file=sys.stderr)
+def log_error_and_exit(msg: str, code: ExitCode):
+    logging.error(msg)
     exit(code)
 
 
@@ -71,16 +71,16 @@ def check_languages(source_language, target_language, _tts, translation, _sst):
 
     if source_language not in spt:
         msg = f"source language '{source_language}' is not supported by the speech recognition system. Supported languages: '{spt}"
-        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_SPT)
+        log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_SPT)
 
     pair = (source_language, target_language)
     if pair not in translation_languages:
         msg = f"language pair '{pair}' is not supported by the translation system."
-        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TRANS)
+        log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TRANS)
 
     if target_language not in tts:
         msg = f"target language '{target_language}' is not supported by the text to speech system. Supported languages: '{tts}"
-        print_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TTS)
+        log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TTS)
 
 
 _ACCEPTED_VIDEO_FORMATS = ["mp4"]
@@ -93,7 +93,7 @@ def check_is_a_video(input_file: str):
     if file_extension in _ACCEPTED_VIDEO_FORMATS:
         return
     msg = f"Unsupported file format: {file_extension}"
-    print_error_and_exit(msg, ExitCode.INVALID_FILEFORMAT)
+    log_error_and_exit(msg, ExitCode.INVALID_FILEFORMAT)
 
 
 HUGGING_FACE_VARNAME = "HF_TOKEN"
@@ -104,7 +104,7 @@ def get_token(provided_token: str) -> str:
     if not token:
         msg = "You must either provide the '--hugging_face_token' argument or"
         msg += f" set the '{HUGGING_FACE_VARNAME.upper()}' environment variable."
-        print_error_and_exit(msg, ExitCode.MISSING_HF_KEY)
+        log_error_and_exit(msg, ExitCode.MISSING_HF_KEY)
     return token
 
 
@@ -143,23 +143,23 @@ def _get_selected_tts(
             from open_dubbing.text_to_speech_coqui import TextToSpeechCoqui
         except Exception:
             msg = "Make sure that Coqui-tts is installed by running 'pip install open-dubbing[coqui]'"
-            print_error_and_exit(msg, ExitCode.NO_COQUI_TTS)
+            log_error_and_exit(msg, ExitCode.NO_COQUI_TTS)
 
         tts = TextToSpeechCoqui(device)
         if not Coqui.is_espeak_ng_installed():
             msg = "To use Coqui-tts you have to have espeak or espeak-ng installed"
-            print_error_and_exit(msg, ExitCode.NO_COQUI_ESPEAK)
+            log_error_and_exit(msg, ExitCode.NO_COQUI_ESPEAK)
     elif selected_tts == "cli":
         if len(tts_cli_cfg_file) == 0:
             msg = "When using the tts CLI you need to provide a configuration file which describes the commands and voices to use."
-            print_error_and_exit(msg, ExitCode.NO_CLI_CFG_FILE)
+            log_error_and_exit(msg, ExitCode.NO_CLI_CFG_FILE)
 
         tts = TextToSpeechCLI(device, tts_cli_cfg_file)
     elif selected_tts == "api":
         tts = TextToSpeechAPI(device, tts_api_server)
         if len(tts_api_server) == 0:
             msg = "When using TTS's API, you need to specify with --tts-api-server the URL of the server"
-            print_error_and_exit(msg, ExitCode.NO_TTS_API_SERVER)
+            log_error_and_exit(msg, ExitCode.NO_TTS_API_SERVER)
 
     else:
         raise ValueError(f"Invalid tts value {selected_tts}")
@@ -177,7 +177,7 @@ def _get_selected_translator(
         server = apertium_server
         if len(server) == 0:
             msg = "When using Apertium's API, you need to specify with --apertium-server the URL of the server"
-            print_error_and_exit(msg, ExitCode.NO_APERTIUM_SERVER)
+            log_error_and_exit(msg, ExitCode.NO_APERTIUM_SERVER)
 
         translation = TranslationApertium(device)
         translation.set_server(server)
@@ -198,7 +198,7 @@ def main():
 
     if not VideoProcessing.is_ffmpeg_installed():
         msg = "You need to have ffmpeg (which includes ffprobe) installed."
-        print_error_and_exit(msg, ExitCode.NO_FFMPEG)
+        log_error_and_exit(msg, ExitCode.NO_FFMPEG)
 
     tts = _get_selected_tts(
         args.tts, args.tts_cli_cfg_file, args.tts_api_server, args.device
