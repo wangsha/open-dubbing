@@ -109,5 +109,5 @@ class TestUterrance:
             output_directory=None,
         )
 
-        modified = dubbing._get_modified_utterances(utterances)
+        modified = dubbing.get_modified_utterances(utterances)
         assert 1 == len(modified)

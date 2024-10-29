@@ -30,14 +30,13 @@ from pyannote.audio import Pipeline
 
 from open_dubbing import audio_processing
 from open_dubbing.demucs import Demucs
+from open_dubbing.exit_code import ExitCode
 from open_dubbing.preprocessing import PreprocessingArtifacts
 from open_dubbing.speech_to_text import SpeechToText
 from open_dubbing.text_to_speech import TextToSpeech
 from open_dubbing.translation import Translation
 from open_dubbing.utterance import Utterance
 from open_dubbing.video_processing import VideoProcessing
-
-_UTTERNACE_METADATA_FILE_NAME: Final[str] = "utterance_metadata"
 
 _DEFAULT_PYANNOTE_MODEL: Final[str] = "pyannote/speaker-diarization-3.1"
 _NUMBER_OF_STEPS: Final[int] = 7
@@ -284,12 +283,14 @@ class Dubber:
             return
 
         output_directory = None
-        for chunk in self.utterance_metadata:
-            for path in [chunk["path"], chunk["dubbed_path"]]:
-                if os.path.exists(path):
-                    os.remove(path)
-                if not output_directory:
-                    output_directory = os.path.dirname(path)
+        paths, dubbed_paths = Utterance(
+            self.target_language, self.output_directory
+        ).get_files_paths(self.utterance_metadata)
+        for path in paths + dubbed_paths:
+            if os.path.exists(path):
+                os.remove(path)
+            if not output_directory:
+                output_directory = os.path.dirname(path)
 
         if output_directory:
             for path in [
@@ -348,15 +349,30 @@ class Dubber:
         start_time = time.time()
         task_start_time = time.time()
 
-        utterance = Utterance(self.target_language, self.output_directory)
-        self.utterance_metadata, self.preprocesing_output = (
-            utterance.load_utterances_json()
-        )
+        logging.info("Update exiting dubbing process started")
+
+        try:
+            utterance = Utterance(self.target_language, self.output_directory)
+            self.utterance_metadata, self.preprocesing_output = (
+                utterance.load_utterances()
+            )
+        except Exception as e:
+            logging.error(
+                f"Unable to read metadata at '{self.output_directory}. "
+                f"Cannot find a previous execution to update. Error: '{e}'"
+            )
+            exit(ExitCode.UPDATE_MISSING_FILES)
+
+        paths, dubbed_paths = utterance.get_files_paths(self.utterance_metadata)
+        for path in paths + dubbed_paths:
+            if not os.path.exists(path):
+                logging.error(
+                    f"Cannot do update operation since file '{path}' is missing. " ""
+                )
+                exit(ExitCode.UPDATE_MISSING_FILES)
 
         # Update voices in case they have changed
-        modified_utterances = utterance._get_modified_utterances(
-            self.utterance_metadata
-        )
+        modified_utterances = utterance.get_modified_utterances(self.utterance_metadata)
 
         assigned_voices = self.tts.assign_voices(
             utterance_metadata=modified_utterances,
@@ -381,7 +397,12 @@ class Dubber:
 
         task_start_time = time.time()
         self.run_postprocessing()
-        self.run_cleaning()
+        Utterance(self.target_language, self.output_directory).save_utterances(
+            utterance_metadata=self.utterance_metadata,
+            preprocesing_output=self.preprocesing_output,
+            source_language=self.source_language,
+        )
+
         times["postprocessing"] = self.log_debug_task_and_getime(
             "Post processing completed", task_start_time
         )

@@ -20,7 +20,7 @@ import os
 import shutil
 import tempfile
 
-from typing import Final
+from typing import Final, List, Tuple
 
 from open_dubbing.preprocessing import PreprocessingArtifacts
 
@@ -41,7 +41,7 @@ class Utterance:
         )
         return utterance_metadata_file
 
-    def load_utterances_json(self) -> tuple[str, str]:
+    def load_utterances(self) -> tuple[str, str]:
         utterance_metadata_file = self._get_file_name()
 
         with open(utterance_metadata_file, "r") as file:
@@ -98,7 +98,18 @@ class Utterance:
 
         return utterance_metadata
 
-    def _get_modified_utterances(self, utterance_metadata):
+    def get_files_paths(self, utterance_metadata) -> Tuple[List[str], List[str]]:
+        dubbed_paths = []
+        paths = []
+        for chunk in utterance_metadata:
+            if "path" in chunk:
+                paths.append(chunk["path"])
+            if "dubbed_path" in chunk:
+                dubbed_paths.append(chunk["dubbed_path"])
+
+        return paths, dubbed_paths
+
+    def get_modified_utterances(self, utterance_metadata):
         modified = []
         for utterance in utterance_metadata:
             _hash_utterance = utterance["hash"]
