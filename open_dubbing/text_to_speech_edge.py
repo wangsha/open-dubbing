@@ -21,6 +21,7 @@ from typing import List
 import edge_tts
 
 from edge_tts import VoicesManager, list_voices
+from edge_tts.exceptions import NoAudioReceived
 from iso639 import Lang
 
 from open_dubbing.text_to_speech import TextToSpeech, Voice
@@ -77,8 +78,23 @@ class TextToSpeechEdge(TextToSpeech):
     async def _save(self, text, speed, assigned_voice, output_filename):
         per = (100 * speed) - 100
         str_per = f"+{per:0.0f}%"
-        communicate = edge_tts.Communicate(text, assigned_voice, rate=str_per)
-        await communicate.save(output_filename)
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                communicate = edge_tts.Communicate(text, assigned_voice, rate=str_per)
+                await communicate.save(output_filename)
+                return
+            except NoAudioReceived:
+                if attempt == max_retries:
+                    logging.error(
+                        "text_to_speech_edge._save. Max retries reached. Could not save audio."
+                    )
+                    raise
+                else:
+                    logging.warning(
+                        f"text_to_speech_edge._save. No audio received, retrying attempt {attempt}."
+                    )
+                    await asyncio.sleep(30)
 
     def _convert_text_to_speech(
         self,
