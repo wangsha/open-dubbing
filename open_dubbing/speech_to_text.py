@@ -144,12 +144,11 @@ class SpeechToText(ABC):
         )
         return speaker_tuple
 
-    def diarize_speakers(
+    def predict_gender(
         self,
         *,
         file: str,
         utterance_metadata: Sequence[Mapping[str, str | float]],
-        number_of_speakers: int,
     ) -> Sequence[tuple[str, str]]:
 
         speaker_gender = {}

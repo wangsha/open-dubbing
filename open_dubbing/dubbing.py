@@ -234,10 +234,9 @@ class Dubber:
             source_language=self.source_language,
             no_dubbing_phrases=[],
         )
-        speaker_info = self.stt.diarize_speakers(
+        speaker_info = self.stt.predict_gender(
             file=media_file,
             utterance_metadata=utterance_metadata,
-            number_of_speakers=1,
         )
         self.utterance_metadata = self.stt.add_speaker_info(
             utterance_metadata=utterance_metadata, speaker_info=speaker_info
