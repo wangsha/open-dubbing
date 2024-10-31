@@ -111,3 +111,25 @@ class TestUterrance:
 
         modified = dubbing.get_modified_utterances(utterances)
         assert 1 == len(modified)
+
+    def test_get_without_empty_blocks(self):
+        utterances = [
+            {
+                "start": 1.26,
+                "end": 3.94,
+                "text": "Hola",
+            },
+            {
+                "start": 5.24,
+                "end": 6.600,
+                "text": "",
+            },
+        ]
+
+        dubbing = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+
+        modified = dubbing.get_without_empty_blocks(utterances)
+        assert 1 == len(modified)

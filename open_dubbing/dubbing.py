@@ -242,6 +242,11 @@ class Dubber:
             utterance_metadata=utterance_metadata, speaker_info=speaker_info
         )
 
+        utterance = Utterance(self.target_language, self.output_directory)
+        self.utterance_metadata = utterance.get_without_empty_blocks(
+            self.utterance_metadata
+        )
+
     def run_translation(self) -> None:
         """Translates transcribed text and potentially merges utterances"""
 

@@ -122,3 +122,16 @@ class Utterance:
 
         logging.info(f"Modified {len(modified)} utterances")
         return modified
+
+    def get_without_empty_blocks(self, utterance_metadata):
+        new_utterance = []
+
+        for utterance in utterance_metadata:
+            text = utterance["text"]
+            if len(text) == 0:
+                logging.debug(f"Removing empty block: {utterance}")
+                continue
+
+            new_utterance.append(utterance)
+
+        return new_utterance
