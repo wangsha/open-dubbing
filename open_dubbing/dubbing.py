@@ -309,24 +309,15 @@ class Dubber:
         """Merges dubbed audio with the original background audio and video (if applicable).
 
         Returns:
-            Path to the final dubbed output file (audio or video).
+            Path to the final dubbed output file.
         """
-
         dubbed_audio_vocals_file = audio_processing.insert_audio_at_timestamps(
             utterance_metadata=self.utterance_metadata,
-            background_audio_file=(
-                self.preprocesing_output.audio_background_file
-                if self.preprocesing_output.audio_background_file
-                else self.preprocesing_output.audio_file
-            ),
+            background_audio_file=self.preprocesing_output.audio_background_file,
             output_directory=self.output_directory,
         )
         dubbed_audio_file = audio_processing.merge_background_and_vocals(
-            background_audio_file=(
-                self.preprocesing_output.audio_background_file
-                if self.preprocesing_output.audio_background_file
-                else self.preprocesing_output.audio_file
-            ),
+            background_audio_file=self.preprocesing_output.audio_background_file,
             dubbed_vocals_audio_file=dubbed_audio_vocals_file,
             output_directory=self.output_directory,
             target_language=self.target_language,
