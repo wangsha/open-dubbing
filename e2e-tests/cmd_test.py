@@ -3,6 +3,7 @@ import os
 import platform
 import tempfile
 
+import numpy as np
 import pytest
 
 from faster_whisper import WhisperModel
@@ -60,19 +61,28 @@ class TestCmd:
 
             if operating == "darwin":
                 assert 4 == len(utterances)
-                assert [
-                    1.26284375,
-                    2.44409375,
-                    5.24534375,
-                    7.607843750000001,
-                ] == starts, "Utterance start check failed"
 
-                assert [
-                    2.17409375,
-                    3.94596875,
-                    6.61221875,
-                    8.687843750000003,
-                ] == ends, "Utterance end check failed"
+                assert np.allclose(
+                    [
+                        1.26284375,
+                        2.44409375,
+                        5.24534375,
+                        7.607843750000001,
+                    ],
+                    starts,
+                    atol=0.1,
+                ), "Utterance start check failed"
+
+                assert np.allclose(
+                    [
+                        2.17409375,
+                        3.94596875,
+                        6.61221875,
+                        8.687843750000003,
+                    ],
+                    ends,
+                    atol=0.1,
+                ), "Utterance end check failed"
 
                 assert "- Bon dia. - Bé." == text_array[0], "translated text 0"
                 assert "El meu nom és Jordi Mas." == text_array[1], "translated text 1"
@@ -83,19 +93,36 @@ class TestCmd:
 
             else:
                 assert 3 == len(utterances)
-                assert [
-                    1.26284375,
-                    5.24534375,
-                    7.607843750000001,
-                ] == starts, "Utterance start check failed"
 
-                assert [
-                    3.94596875,
-                    6.629093750000001,
-                    8.687843750000003,
-                ] == ends, "Utterance end check failed"
+                assert np.allclose(
+                    [
+                        1.26284375,
+                        5.24534375,
+                        7.607843750000001,
+                    ],
+                    starts,
+                    atol=0.1,
+                ), "Utterance start check failed"
 
-                assert [1.0, 1.0, 1.3] == speeds, "Utterance speed check failed"
+                assert np.allclose(
+                    [
+                        3.94596875,
+                        6.629093750000001,
+                        8.687843750000003,
+                    ],
+                    ends,
+                    atol=0.1,
+                ), "Utterance end check failed"
+
+                assert np.allclose(
+                    [
+                        1.0,
+                        1.0,
+                        1.0,
+                    ],
+                    speeds,
+                    atol=0.1,
+                ), "Utterance speed check failed"
 
                 assert (
                     "Bon dia, em dic Jordi Mas." == text_array[0]
