@@ -193,11 +193,22 @@ class TextToSpeech(ABC):
     def _calculate_target_utterance_speed(
         self,
         *,
-        reference_length: float,
+        start: float,
+        end: float,
         dubbed_file: str,
+        utterance_metadata: Sequence[Mapping[str, float | str]],
+        audio_file=str,
     ) -> float:
         """Returns the ratio between the reference and target duration."""
 
+        end = self.get_start_time_of_next_speech_utterance(
+            utterance_metadata=utterance_metadata,
+            start=start,
+            end=end,
+            audio_file=audio_file,
+        )
+
+        reference_length = end - start
         dubbed_audio = AudioSegment.from_file(dubbed_file)
         dubbed_duration = dubbed_audio.duration_seconds
         r = dubbed_duration / reference_length
@@ -258,47 +269,41 @@ class TextToSpeech(ABC):
         self,
         *,
         utterance_metadata: Sequence[Mapping[str, str | float]],
-        from_time: float,
+        start: float,
+        end: float,
+        audio_file: str,
     ) -> int:
         result = None
         for utterance in utterance_metadata:
-            start = utterance["start"]
-            if start <= from_time:
+            u_start = utterance["start"]
+            if u_start <= start:
                 continue
 
             for_dubbing = utterance["for_dubbing"]
             if not for_dubbing:
                 continue
 
-            result = start
+            result = u_start
             break
 
+        if not result:
+            try:
+                background_audio = AudioSegment.from_mp3(audio_file)
+                total_duration = background_audio.duration_seconds
+                logging.debug(
+                    f"get_start_time_of_next_speech_utterance. File duration: {total_duration}"
+                )
+                result = total_duration
+            except Exception as e:
+                logging.error(f"Error '{e}' reading {audio_file}")
+
+        if not result:
+            result = end
+
         logging.debug(
-            f"get_start_time_of_next_speech_utterance from_time:{from_time}, result: {result}"
+            f"get_start_time_of_next_speech_utterance from_time: {start}, result: {result}"
         )
         return result
-
-    def _do_need_to_increase_speed(
-        self,
-        *,
-        utterance_metadata: Sequence[Mapping[str, str | float]],
-        dubbed_path: str,
-        start: float,
-    ) -> bool:
-
-        next_start = self.get_start_time_of_next_speech_utterance(
-            utterance_metadata=utterance_metadata, from_time=start
-        )
-        dubbed_audio = AudioSegment.from_file(dubbed_path)
-        dubbed_duration = dubbed_audio.duration_seconds
-        end = dubbed_duration + start
-        logging.debug(
-            f"_do_need_to_increase_speed. start: {start}, next_start: {next_start} < end: {end}, duration: {dubbed_duration}"
-        )
-        if next_start and end < next_start:
-            return False
-
-        return True
 
     def dub_utterances(
         self,
@@ -306,6 +311,7 @@ class TextToSpeech(ABC):
         utterance_metadata: Sequence[Mapping[str, str | float]],
         output_directory: str,
         target_language: str,
+        audio_file: str,
         adjust_speed: bool = True,
     ) -> Sequence[Mapping[str, str | float]]:
         """Processes a list of utterance metadata, generating dubbed audio files."""
@@ -346,31 +352,25 @@ class TextToSpeech(ABC):
                 assigned_voice = utterance_copy.get("assigned_voice", None)
                 assigned_voice = assigned_voice if assigned_voice else ""
                 support_speeds = self._does_voice_supports_speeds()
+
+                start = utterance["start"]
+                end = utterance["end"]
                 speed = self._calculate_target_utterance_speed(
-                    reference_length=reference_length, dubbed_file=dubbed_path
+                    start=start,
+                    end=end,
+                    dubbed_file=dubbed_path,
+                    utterance_metadata=utterance_metadata,
+                    audio_file=audio_file,
                 )
+
                 logging.debug(f"support_speeds: {support_speeds}, speed: {speed}")
 
                 if speed > 1.0:
-                    increase_speed = self._do_need_to_increase_speed(
-                        utterance_metadata=utterance_metadata,
-                        dubbed_path=dubbed_path,
-                        start=utterance_copy["start"],
-                    )
                     translated_text = utterance_copy["translated_text"]
-                    if not increase_speed:
-                        logging.debug(
-                            f"text_to_speech.dub_utterances. No need to increase speed for '{translated_text}'"
-                        )
-                    else:
-                        logging.debug(
-                            f"text_to_speech.dub_utterances. Need to increase speed for '{translated_text}'"
-                        )
+                    logging.debug(
+                        f"text_to_speech.dub_utterances. Need to increase speed for '{translated_text}'"
+                    )
 
-                else:
-                    increase_speed = False
-
-                if increase_speed and speed > 1.0:
                     MAX_SPEED = 1.3
                     if speed > MAX_SPEED:
                         logging.debug(

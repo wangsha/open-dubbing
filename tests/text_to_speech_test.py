@@ -59,14 +59,23 @@ class TextToSpeechUT(TextToSpeech):
 class TestTextToSpeech:
 
     def test_calculate_target_utterance_speed(self):
-        with tempfile.TemporaryDirectory() as tempdir:
-            dubbed_audio_mock = AudioSegment.silent(duration=90000)
+        END_BLOCK = 60
+        DURATION = 90
+
+        tts = TextToSpeechUT()
+        with tempfile.TemporaryDirectory() as tempdir, patch.object(
+            tts, "get_start_time_of_next_speech_utterance", return_value=END_BLOCK
+        ):
+            dubbed_audio_mock = AudioSegment.silent(duration=DURATION * 1000)
             dubbed_file_path = os.path.join(tempdir, "dubbed.mp3")
             dubbed_audio_mock.export(dubbed_file_path, format="mp3")
-            result = TextToSpeechUT()._calculate_target_utterance_speed(
-                reference_length=60.0, dubbed_file=dubbed_file_path
+            result = tts._calculate_target_utterance_speed(
+                start=0,
+                end=60,
+                dubbed_file=dubbed_file_path,
+                utterance_metadata="mocked",
             )
-            expected_result = 90000 / 60000
+            expected_result = (DURATION * 1000) / (END_BLOCK * 1000)
             assert result == expected_result
 
     @pytest.mark.parametrize(
@@ -108,8 +117,7 @@ class TestTextToSpeech:
     def test_dub_utterances_with_speeds(
         self, calculated_speed, expect_adjust_called, expected_final_speed
     ):
-        #        assert False == True
-        tts = TextToSpeechUT()  # Your actual TextToSpeech implementation
+        tts = TextToSpeechUT()
 
         # Mock dependencies
         utterance_metadata = [
@@ -139,13 +147,12 @@ class TestTextToSpeech:
             tts, "_adjust_audio_speed"
         ) as mock_adjust_speed, patch.object(
             tts, "_calculate_target_utterance_speed", return_value=calculated_speed
-        ), patch.object(
-            tts, "_do_need_to_increase_speed", return_value=True
         ):
             result = tts.dub_utterances(
                 utterance_metadata=utterance_metadata,
                 output_directory=output_directory,
                 target_language=target_language,
+                audio_file="",
             )
 
             if expect_adjust_called:
@@ -202,15 +209,38 @@ class TestTextToSpeech:
                 ],
                 3.0,
             ),
+            (
+                "read files",
+                [
+                    {
+                        "text": "Hello, world!",
+                        "start": 1.0,
+                        "stop": 2.0,
+                        "speaker_id": "speaker1",
+                        "for_dubbing": "true",
+                        "gender": "male",
+                    },
+                ],
+                4.0,
+            ),
         ],
     )
     def test_get_start_time_of_next_speech_utterance(
         self, test_name, utterance_metadata, expected_result
     ):
-        result = TextToSpeechUT().get_start_time_of_next_speech_utterance(
-            utterance_metadata=utterance_metadata, from_time=1.0
-        )
-        assert result == expected_result
+        DURATION = 4
+        with tempfile.TemporaryDirectory() as tempdir:
+            dubbed_audio_mock = AudioSegment.silent(duration=DURATION * 1000)
+            dubbed_file_path = os.path.join(tempdir, "dubbed.mp3")
+            dubbed_audio_mock.export(dubbed_file_path, format="mp3")
+
+            result = TextToSpeechUT().get_start_time_of_next_speech_utterance(
+                utterance_metadata=utterance_metadata,
+                start=1.0,
+                end=1.5,
+                audio_file=dubbed_file_path,
+            )
+            assert result == expected_result
 
     def test_get_voices_with_region_filter(self):
         voices = [

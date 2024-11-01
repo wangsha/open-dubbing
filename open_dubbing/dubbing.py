@@ -279,6 +279,7 @@ class Dubber:
             utterance_metadata=self.utterance_metadata,
             output_directory=self.output_directory,
             target_language=self.target_language,
+            audio_file=self.preprocesing_output.audio_file,
             adjust_speed=True,
         )
 
@@ -384,6 +385,7 @@ class Dubber:
             utterance_metadata=modified_utterances,
             output_directory=self.output_directory,
             target_language=self.target_language,
+            audio_file=self.preprocesing_output.audio_file,
             adjust_speed=True,
         )
         times["tts"] = self.log_debug_task_and_getime(
