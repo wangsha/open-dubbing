@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.1]
+
+### Added
+- Retry if Edge TTS fails to provide the synthesis. Happens sometimes
+- Improved 'update' command which updates now utterances file and checks files needed
+
+### Fixed
+- Remove empty blocks of dubbed audios that do not contain text
+- Speed calculation: when it's the last block, not to increase the speed if is not needed
+
 ## [0.1.0]
 
 ### Added
