@@ -34,7 +34,6 @@ class Demucs:
         jobs: int = 0,
         split: bool = True,
         segment: int | None = None,
-        flac: bool = False,
         mp3: bool = True,
     ) -> str:
         """Builds the Demucs audio separation command.
@@ -50,7 +49,6 @@ class Demucs:
             jobs: The number of jobs to run in parallel.
             split: Whether to split audio into chunks.
             segment: The split size for chunks (None for no splitting).
-            flac: Convert output to FLAC.
             mp3: Convert output to MP3.
 
         Returns:
@@ -77,8 +75,6 @@ class Demucs:
             command_parts.append("--no-split")
         elif segment is not None:
             command_parts.extend(["--segment", str(segment)])
-        if flac:
-            command_parts.append("--flac")
         if mp3:
             command_parts.extend(
                 [
@@ -107,25 +103,9 @@ class Demucs:
             )
             logging.info(result.stdout)
         except subprocess.CalledProcessError as error:
-            logging.warning(
-                "Error in the first attempt to separate audio:"
-                f" {error}\n{error.stderr}. Retrying with 'python3' instead of"
-                " 'python'."
+            raise Exception(
+                f"Error in attempt to separate audio: {error}\n{error.stderr}"
             )
-            python3_command = command.replace("python", "python3", 1)
-            try:
-                result = subprocess.run(
-                    python3_command,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                logging.info(result.stdout)
-            except subprocess.CalledProcessError as error:
-                raise Exception(
-                    f"Error in final attempt to separate audio: {error}\n{error.stderr}"
-                )
 
     def _extract_command_info(self, command: str) -> tuple[str, str, str]:
         """Extracts folder name, output file extension, and input file name (without path) from a Demucs command.
@@ -138,11 +118,9 @@ class Demucs:
             input_file_name).
         """
         folder_pattern = r"-o\s+(['\"]?)(.+?)\1"
-        flac_pattern = r"--flac"
         mp3_pattern = r"--mp3"
         input_file_pattern = r"['\"]?(\w+\.\w+)['\"]?$|\s(\w+\.\w+)$"
         folder_match = re.search(folder_pattern, command)
-        flac_match = re.search(flac_pattern, command)
         mp3_match = re.search(mp3_pattern, command)
         input_file_match = re.search(input_file_pattern, command)
         output_directory = folder_match.group(2) if folder_match else ""
@@ -154,9 +132,7 @@ class Demucs:
         input_file_name_no_ext = (
             os.path.splitext(input_file_name_with_ext)[0] if input_file_match else ""
         )
-        if flac_match:
-            output_file_extension = ".flac"
-        elif mp3_match:
+        if mp3_match:
             output_file_extension = ".mp3"
         else:
             output_file_extension = ".wav"

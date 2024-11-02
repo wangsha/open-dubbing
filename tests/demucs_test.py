@@ -37,15 +37,6 @@ class TestBuildDemucsCommand:
                 ),
             ),
             (
-                "flac",
-                {"flac": True, "mp3": False},
-                (
-                    'python -m demucs.separate -o "test" --device cpu --shifts 1'
-                    " --overlap 0.25 -j 0 --two-stems vocals --flac"
-                    ' "audio.mp3"'
-                ),
-            ),
-            (
                 "segment",
                 {"segment": 60},
                 (
@@ -93,16 +84,6 @@ class TestExtractCommandInfo:
                 ".mp3",
                 "audio",
             ),
-            (
-                "FLAC Output",
-                (
-                    "python3 -m demucs.separate -o 'results' --flac --shifts 5"
-                    " 'audio.flac'"
-                ),
-                "results",
-                ".flac",
-                "audio",
-            ),
         ],
     )
     def test_valid_command(
@@ -130,12 +111,6 @@ class TestAssembleSplitAudioFilePaths:
                 ),
                 "test/htdemucs/audio/vocals.wav",
                 "test/htdemucs/audio/no_vocals.wav",
-            ),
-            (
-                "FLAC Output",
-                "python3 -m demucs.separate -o 'out_flac' --flac \"audio.mp3\"",
-                "out_flac/htdemucs/audio/vocals.flac",
-                "out_flac/htdemucs/audio/no_vocals.flac",
             ),
         ],
     )
@@ -177,7 +152,7 @@ class TestExecuteDemucsCommand:
 
         with pytest.raises(
             Exception,
-            match=r"Error in final attempt to separate audio:.*\nSome Demucs error message",
+            match=r"Error in attempt to separate audio.*",
         ):
             Demucs().execute_demucs_command(
                 "python3 -m demucs.separate -o out_folder --mp3 --two-stems audio.mp3"
