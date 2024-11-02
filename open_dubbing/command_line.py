@@ -91,7 +91,7 @@ class CommandLine:
             ),
         )
         parser.add_argument(
-            "--apertium-server",
+            "--apertium_server",
             type=str,
             default="",
             help=("Apertium's URL server to use"),
@@ -150,7 +150,7 @@ class CommandLine:
             help="Set the logging level",
         )
         parser.add_argument(
-            "--tts-api-server",
+            "--tts_api_server",
             type=str,
             default="",
             help=("TTS api server URL when using the 'API' tts"),

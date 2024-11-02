@@ -24,12 +24,12 @@ options:
   --hugging_face_token HUGGING_FACE_TOKEN
                         Hugging Face API token.
   --tts {mms,coqui,edge,cli,api}
-                        Text to Speech engine to use. Choices are:'mms': Meta Multilingual Speech engine, supports many languages.'coqui': Coqui TTS, an open-source alternative for
-                        high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined TTS API contract to enable non
-                        supported TTS
+                        Text to Speech engine to use. Choices are:'mms': Meta Multilingual Speech engine, supports many languages.'coqui': Coqui TTS, an open-source
+                        alternative for high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined
+                        TTS API contract to enable non supported TTS
   --stt {auto,faster-whisper,transformers}
-                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper implementation.'transformers':
-                        Transformers OpenAI whisper implementation.
+                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper
+                        implementation.'transformers': Transformers OpenAI whisper implementation.
   --translator {nllb,apertium}
                         Text to Speech engine to use. Choices are:'nllb': Meta's no Language Left Behind (NLLB).'apertium'': Apertium compatible API server
   --apertium-server APERTIUM_SERVER
@@ -49,7 +49,7 @@ options:
                         JSon configuration file when using a TTS which is involved by command line.
   --log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set the logging level
-  --tts-api-server TTS_API_SERVER
+  --tts_api_server TTS_API_SERVER
                         TTS api server URL when using the 'API' tts
   --update              Update the dubbed video produced by a previous execution with the latest changes in utterance_metadata file
 

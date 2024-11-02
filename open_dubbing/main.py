@@ -158,7 +158,7 @@ def _get_selected_tts(
     elif selected_tts == "api":
         tts = TextToSpeechAPI(device, tts_api_server)
         if len(tts_api_server) == 0:
-            msg = "When using TTS's API, you need to specify with --tts-api-server the URL of the server"
+            msg = "When using TTS's API, you need to specify with --tts_api_server the URL of the server"
             log_error_and_exit(msg, ExitCode.NO_TTS_API_SERVER)
 
     else:
@@ -176,7 +176,7 @@ def _get_selected_translator(
     elif translator == "apertium":
         server = apertium_server
         if len(server) == 0:
-            msg = "When using Apertium's API, you need to specify with --apertium-server the URL of the server"
+            msg = "When using Apertium's API, you need to specify with --apertium_server the URL of the server"
             log_error_and_exit(msg, ExitCode.NO_APERTIUM_SERVER)
 
         translation = TranslationApertium(device)
