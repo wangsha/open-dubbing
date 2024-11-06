@@ -345,7 +345,7 @@ class Dubber:
         start_time = time.time()
         task_start_time = time.time()
 
-        logging.info("Update exiting dubbing process started")
+        logging.info("Update dubbing process started")
 
         try:
             utterance = Utterance(self.target_language, self.output_directory)
