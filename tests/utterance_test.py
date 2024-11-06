@@ -46,14 +46,16 @@ class TestUterrance:
                 assert data == {
                     "utterances": [
                         {
+                            "id": 1,
                             "start": 1.26,
                             "end": 3.94,
-                            "hash": "2fa6f80e0c81fb8e142f2dbbad0bceff7c21a031833b5752bc1cfd799f6b3bc6",
+                            "hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
                         },
                         {
+                            "id": 2,
                             "start": 5.24,
                             "end": 6.629,
-                            "hash": "34cd5da78cb163ad18996aefffcfeae864727257defc7ae68818a245ca269951",
+                            "hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
                         },
                     ],
                     "source_language": "spa",
@@ -93,17 +95,18 @@ class TestUterrance:
     def test_get_modified_utterances(self):
         utterances = [
             {
+                "id": 1,
                 "start": 1.26,
                 "end": 3.94,
-                "hash": "2fa6f80e0c81fb8e142f2dbbad0bceff7c21a031833b5752bc1cfd799f6b3bc6",
+                "hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
             },
             {
-                "start": 5.24,
-                "end": 6.600,
-                "hash": "34cd5da78cb163ad18996aefffcfeae864727257defc7ae68818a245ca269951",
+                "id": 2,
+                "start": 5.25,
+                "end": 6.629,
+                "hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
             },
         ]
-
         dubbing = Utterance(
             target_language="cat",
             output_directory=None,
@@ -133,3 +136,26 @@ class TestUterrance:
 
         modified = dubbing.get_without_empty_blocks(utterances)
         assert 1 == len(modified)
+
+    def test_add_unique_ids(self):
+
+        utterances = [
+            {
+                "start": 1.26,
+                "end": 3.94,
+            },
+            {
+                "start": 5.24,
+                "end": 6.629,
+            },
+        ]
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+
+        unique_ids = utterance._add_unique_ids(utterances)
+        assert unique_ids == [
+            {"id": 1, "start": 1.26, "end": 3.94},
+            {"id": 2, "start": 5.24, "end": 6.629},
+        ]

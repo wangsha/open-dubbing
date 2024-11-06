@@ -65,6 +65,7 @@ class Utterance:
 
         try:
             all_data = {}
+            utterance_metadata = self._add_unique_ids(utterance_metadata)
             utterance_metadata = self._hash_utterances(utterance_metadata)
             all_data["utterances"] = utterance_metadata
             if preprocesing_output:
@@ -95,6 +96,14 @@ class Utterance:
             dict_str = json.dumps(utterance, sort_keys=True)
             _hash = hashlib.sha256(dict_str.encode()).hexdigest()
             utterance["hash"] = _hash
+
+        return utterance_metadata
+
+    def _add_unique_ids(self, utterance_metadata):
+        for idx, utterance in enumerate(utterance_metadata, start=1):
+            new_utterance = {"id": idx}
+            new_utterance.update(utterance)
+            utterance_metadata[idx - 1] = new_utterance
 
         return utterance_metadata
 
