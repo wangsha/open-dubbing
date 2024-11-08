@@ -363,7 +363,7 @@ class Dubber:
         for path in paths + dubbed_paths:
             if not os.path.exists(path):
                 logging.error(
-                    f"Cannot do update operation since file '{path}' is missing. " ""
+                    f"Cannot do update operation since file '{path}' is missing."
                 )
                 exit(ExitCode.UPDATE_MISSING_FILES)
 
