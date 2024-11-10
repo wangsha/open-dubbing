@@ -54,7 +54,13 @@ class Utterance:
         return utterance_metadata, preprocesing_output
 
     def save_utterances(
-        self, *, utterance_metadata: str, preprocesing_output: str, source_language: str
+        self,
+        *,
+        utterance_metadata: str,
+        preprocesing_output: str,
+        source_language: str,
+        do_hash: bool = True,
+        unique_id: bool = True,
     ) -> None:
         """Saves a Python dictionary to a JSON file.
 
@@ -65,8 +71,12 @@ class Utterance:
 
         try:
             all_data = {}
-            utterance_metadata = self._add_unique_ids(utterance_metadata)
-            utterance_metadata = self._hash_utterances(utterance_metadata)
+            if do_hash:
+                utterance_metadata = self._add_unique_ids(utterance_metadata)
+
+            if unique_id:
+                utterance_metadata = self._hash_utterances(utterance_metadata)
+
             all_data["utterances"] = utterance_metadata
             if preprocesing_output:
                 all_data["PreprocessingArtifacts"] = dataclasses.asdict(
@@ -144,3 +154,49 @@ class Utterance:
             new_utterance.append(utterance)
 
         return new_utterance
+
+    def update_utterances(self, utterance_master, utterance_update):
+        id_to_update = {}
+        utterance_new = []
+
+        for utterance in utterance_update:
+            id = utterance["id"]
+            id_to_update[id] = utterance
+
+        for utterance in utterance_master:
+            id = utterance["id"]
+            update = id_to_update.get(id, None)
+            if not update:
+                utterance_new.append(utterance)
+                continue
+
+            operation = update.get("operation", None)
+            if not operation:
+                raise ValueError("No operation field defined")
+
+            if operation == "delete":
+                continue
+
+            if operation != "update":
+                raise ValueError(f"Invalid operation {operation}")
+
+            updateable_fields = [
+                "speaker_id",
+                "translated_text",
+                "speed",
+                "assigned_voice",
+                "for_dubbing",
+                "gender",
+                "start",
+                "end",
+            ]
+            for field in updateable_fields:
+                value = update.get(field, None)
+                if not value:
+                    continue
+
+                utterance[field] = value
+
+            utterance_new.append(utterance)
+
+        return utterance_new

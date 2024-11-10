@@ -159,3 +159,84 @@ class TestUterrance:
             {"id": 1, "start": 1.26, "end": 3.94},
             {"id": 2, "start": 5.24, "end": 6.629},
         ]
+
+    def _get_master_utterances(self):
+        return [
+            {
+                "id": 1,
+                "start": 1.26284375,
+                "end": 3.94596875,
+                "speaker_id": "SPEAKER_00",
+                "path": "output/jordi.central.edge.update/chunk_1.26284375_3.94596875.mp3",
+                "text": "Good morning, my name is Jordi Mas.",
+                "for_dubbing": True,
+                "gender": "Male",
+                "translated_text": "Bon dia, el meu nom és Jordi Mas.",
+                "assigned_voice": "ca-ES-EnricNeural",
+                "speed": 1.0,
+                "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_1.26284375_3.94596875.mp3",
+                "hash": "b01b399ac50f80f87e704918e290ffc5ee0a1962683ba946c627124ea903480d",
+            },
+            {
+                "id": 2,
+                "start": 5.24534375,
+                "end": 6.629093750000001,
+                "speaker_id": "SPEAKER_00",
+                "path": "output/jordi.central.edge.update/chunk_5.24534375_6.629093750000001.mp3",
+                "text": "I am from Barcelona.",
+                "for_dubbing": True,
+                "gender": "Male",
+                "translated_text": "Sóc de Barcelona.",
+                "assigned_voice": "ca-ES-EnricNeural",
+                "speed": 1.0,
+                "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_5.24534375_6.629093750000001.mp3",
+                "hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
+            },
+        ]
+
+    def test_update_utterances_operation_delete(self):
+
+        master = self._get_master_utterances()
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+
+        update_utterances = [{"id": 1, "operation": "delete"}]
+        new_utterances = utterance.update_utterances(master, update_utterances)
+        assert len(new_utterances) == 1
+        assert new_utterances[0]["id"] == 2
+
+    def test_update_utterances_operation_update(self):
+        master = self._get_master_utterances()
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+
+        update_utterances = [
+            {
+                "id": 2,
+                "operation": "update",
+                "gender": "Female",
+                "translated_text": "Sóc de Tarragona",
+            }
+        ]
+        new_utterances = utterance.update_utterances(master, update_utterances)
+        assert len(new_utterances) == 2
+        assert new_utterances[0] == master[0]
+        assert new_utterances[1] == {
+            "id": 2,
+            "start": 5.24534375,
+            "end": 6.629093750000001,
+            "speaker_id": "SPEAKER_00",
+            "path": "output/jordi.central.edge.update/chunk_5.24534375_6.629093750000001.mp3",
+            "text": "I am from Barcelona.",
+            "for_dubbing": True,
+            "gender": "Female",
+            "translated_text": "Sóc de Tarragona",
+            "assigned_voice": "ca-ES-EnricNeural",
+            "speed": 1.0,
+            "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_5.24534375_6.629093750000001.mp3",
+            "hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
+        }
