@@ -25,14 +25,14 @@ options:
                         Hugging Face API token.
   --tts {mms,coqui,edge,cli,api}
                         Text to Speech engine to use. Choices are:'mms': Meta Multilingual Speech engine, supports many languages.'coqui': Coqui TTS, an open-source
-                        alternative for high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined
-                        TTS API contract to enable non supported TTS
+                        alternative for high-quality TTS.'edge': Microsoft Edge TSS.'cli': User defined TTS invoked from command line'api': Implements a user defined TTS
+                        API contract to enable non supported TTS
   --stt {auto,faster-whisper,transformers}
-                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper
-                        implementation.'transformers': Transformers OpenAI whisper implementation.
+                        Speech to text. Choices are:'auto': Autoselect best implementation.'faster-whisper': Faster-whisper's OpenAI whisper implementation.'transformers':
+                        Transformers OpenAI whisper implementation.
   --translator {nllb,apertium}
                         Text to Speech engine to use. Choices are:'nllb': Meta's no Language Left Behind (NLLB).'apertium'': Apertium compatible API server
-  --apertium-server APERTIUM_SERVER
+  --apertium_server APERTIUM_SERVER
                         Apertium's URL server to use
   --device {cpu,cuda}   Device to use
   --cpu_threads CPU_THREADS
