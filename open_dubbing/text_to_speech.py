@@ -22,7 +22,6 @@ from abc import ABC, abstractmethod
 from typing import Final, List, Mapping, NamedTuple, Sequence
 
 from pydub import AudioSegment
-from pydub.effects import speedup
 
 _DEFAULT_CHUNK_SIZE: Final[int] = 150
 
@@ -247,20 +246,22 @@ class TextToSpeech(ABC):
         is the same or shorter than the duration of the reference file.
         """
 
-        dubbed_audio = AudioSegment.from_file(dubbed_file)
-        logging.debug(
-            "Adjusting audio speed will prevent overlaps of utterances. However,"
-            " it might change the voice sligthly."
-        )
-        crossfade = max(1, chunk_size // 2)
+        filename = ""
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            shutil.copyfile(dubbed_file, temp_file.name)
+            null_device = (
+                "NUL" if platform.system().lower() == "windows" else "/dev/null"
+            )
+            cmd = f'ffmpeg -y -i {temp_file.name} -filter:a "atempo={speed}" {dubbed_file} > {null_device} 2>&1'
+            os.system(cmd)
+            filename = temp_file.name
+
+        if os.path.exists(filename):
+            os.remove(filename)
 
         logging.debug(
-            f"text_to_speech.adjust_audio_speed: dubbed_audio: {dubbed_file}, speed: {speed}, chunk_size: {chunk_size}, crossfade: {crossfade}"
+            f"text_to_speech.adjust_audio_speed: dubbed_audio: {dubbed_file}, speed: {speed}"
         )
-        output_audio = speedup(
-            dubbed_audio, speed, chunk_size=chunk_size, crossfade=crossfade
-        )
-        output_audio.export(dubbed_file, format="mp3")
 
     def _does_voice_supports_speeds(self):
         return False
