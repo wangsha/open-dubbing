@@ -15,6 +15,7 @@
 
 import logging
 import os
+import warnings
 
 from typing import Final, Mapping, Sequence
 
@@ -40,14 +41,16 @@ def create_pyannote_timestamps(
         A list of dictionaries containing start and end timestamps for each
         speaker segment.
     """
-    if device == "cuda":
-        pipeline.to(torch.device("cuda"))
-    diarization = pipeline(audio_file)
-    utterance_metadata = [
-        {"start": segment.start, "end": segment.end, "speaker_id": speaker}
-        for segment, _, speaker in diarization.itertracks(yield_label=True)
-    ]
-    return utterance_metadata
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        if device == "cuda":
+            pipeline.to(torch.device("cuda"))
+        diarization = pipeline(audio_file)
+        utterance_metadata = [
+            {"start": segment.start, "end": segment.end, "speaker_id": speaker}
+            for segment, _, speaker in diarization.itertracks(yield_label=True)
+        ]
+        return utterance_metadata
 
 
 def _cut_and_save_audio(

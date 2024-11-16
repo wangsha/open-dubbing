@@ -14,6 +14,7 @@
 
 import os
 import subprocess
+import warnings
 
 from typing import Final
 
@@ -32,7 +33,8 @@ class VideoProcessing:
 
         base_filename = os.path.basename(video_file)
         filename, _ = os.path.splitext(base_filename)
-        with VideoFileClip(video_file) as video_clip:
+        with VideoFileClip(video_file) as video_clip, warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
             audio_clip = video_clip.audio
             audio_output_file = os.path.join(output_directory, filename + "_audio.mp3")
             audio_clip.write_audiofile(audio_output_file, verbose=False, logger=None)

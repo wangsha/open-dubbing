@@ -101,7 +101,7 @@ class Demucs:
             result = subprocess.run(
                 command, shell=True, capture_output=True, text=True, check=True
             )
-            logging.info(result.stdout)
+            logging.debug(result.stdout)
         except subprocess.CalledProcessError as error:
             raise Exception(
                 f"Error in attempt to separate audio: {error}\n{error.stderr}"
