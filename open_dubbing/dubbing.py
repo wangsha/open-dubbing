@@ -359,8 +359,8 @@ class Dubber:
             )
             exit(ExitCode.UPDATE_MISSING_FILES)
 
-        paths, dubbed_paths = utterance.get_files_paths(self.utterance_metadata)
-        for path in paths + dubbed_paths:
+        _, dubbed_paths = utterance.get_files_paths(self.utterance_metadata)
+        for path in dubbed_paths:
             if not os.path.exists(path):
                 logging.error(
                     f"Cannot do update operation since file '{path}' is missing."
