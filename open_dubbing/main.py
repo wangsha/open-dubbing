@@ -15,6 +15,7 @@
 import logging
 import os
 import sys
+import transformers
 
 from iso639 import Lang
 
@@ -55,7 +56,7 @@ def _init_logging(log_level):
     logger.addHandler(console_handler)
 
     logging.getLogger("pydub.converter").setLevel(logging.ERROR)
-
+    transformers.logging.set_verbosity_error()
 
 def log_error_and_exit(msg: str, code: ExitCode):
     logging.error(msg)
