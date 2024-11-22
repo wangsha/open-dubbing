@@ -82,7 +82,10 @@ class Utterance:
                 all_data["PreprocessingArtifacts"] = dataclasses.asdict(
                     preprocesing_output
                 )
-            all_data["source_language"] = source_language
+            metadata = {}
+            metadata["source_language"] = source_language
+            all_data["metadata"] = metadata
+
             json_data = json.dumps(all_data, ensure_ascii=False, indent=4)
             with tempfile.NamedTemporaryFile(
                 mode="w", delete=False, encoding="utf-8"

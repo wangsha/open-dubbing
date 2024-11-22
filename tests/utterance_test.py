@@ -58,7 +58,9 @@ class TestUterrance:
                             "hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
                         },
                     ],
-                    "source_language": "spa",
+                    "metadata": {
+                        "source_language": "spa",
+                    },
                 }
 
     def test_hash_utterances(self):
