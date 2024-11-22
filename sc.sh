@@ -24,6 +24,7 @@ for input_file in "${inputs[@]}"; do
       --tts_api_server=http://localhost:8100/ \
       --target_language_region="central" \
       --device=cpu \
+      --dubbed_subtitles\
       --log_level=INFO
     if [ $? -ne 0 ]; then
         echo "Error occurred with open-dubbing. Exiting loop."

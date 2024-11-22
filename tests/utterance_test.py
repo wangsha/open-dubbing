@@ -36,7 +36,7 @@ class TestUterrance:
             ]
 
             utterance.save_utterances(
-                source_language="spa",
+                metadata={"source_language": "spa"},
                 utterance_metadata=utterance_metadata,
                 preprocesing_output=None,
             )

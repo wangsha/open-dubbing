@@ -264,6 +264,8 @@ def main():
         device=args.device,
         cpu_threads=args.cpu_threads,
         clean_intermediate_files=args.clean_intermediate_files,
+        original_subtitles=args.original_subtitles,
+        dubbed_subtitles=args.dubbed_subtitles,
     )
     logging.info(
         f"Processing '{args.input_file}' file with tts '{args.tts}', sst '{args.stt}' and device '{args.device}'"
