@@ -16,6 +16,7 @@ import json
 import os
 import tempfile
 
+from open_dubbing.preprocessing import PreprocessingArtifacts
 from open_dubbing.utterance import Utterance
 
 
@@ -241,4 +242,25 @@ class TestUterrance:
             "speed": 1.0,
             "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_5.24534375_6.629093750000001.mp3",
             "hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
+        }
+
+    def test_load_utterances(self):
+        directory = os.path.dirname(os.path.realpath(__file__))
+        directory = os.path.join(directory, "data/")
+        utterance = Utterance(target_language="cat", output_directory=directory)
+
+        utterances, preprocesing_output, metadata = utterance.load_utterances()
+        assert utterances == [{"id": 1, "text": "Good morning."}]
+
+        assert preprocesing_output == PreprocessingArtifacts(
+            video_file="jordi_video.mp4",
+            audio_file="jordi_audio.mp3",
+            audio_vocals_file="htdemucs/jordi_audio/vocals.mp3",
+            audio_background_file="htdemucs/jordi_audio/no_vocals.mp3",
+        )
+
+        assert metadata == {
+            "source_language": "eng",
+            "original_subtitles": False,
+            "dubbed_subtitles": False,
         }

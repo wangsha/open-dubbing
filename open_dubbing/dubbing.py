@@ -364,7 +364,7 @@ class Dubber:
 
         try:
             utterance = Utterance(self.target_language, self.output_directory)
-            self.utterance_metadata, self.preprocesing_output = (
+            self.utterance_metadata, self.preprocesing_output, _ = (
                 utterance.load_utterances()
             )
         except Exception as e:

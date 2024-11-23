@@ -46,12 +46,13 @@ class Utterance:
 
         with open(utterance_metadata_file, "r") as file:
             data = json.load(file)
-            utterance_metadata = data["utterances"]
+            utterances = data["utterances"]
             preprocesing_output = PreprocessingArtifacts(
                 **data["PreprocessingArtifacts"]
             )
+            metadata = data["metadata"]
 
-        return utterance_metadata, preprocesing_output
+        return utterances, preprocesing_output, metadata
 
     def save_utterances(
         self,
