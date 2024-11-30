@@ -15,33 +15,46 @@
 """Tests for utility functions in audio_processing.py."""
 
 import os
+import subprocess
 import tempfile
 
 from unittest.mock import MagicMock
 
-import numpy as np
 import pytest
 
-from moviepy.audio.AudioClip import AudioArrayClip
 from pyannote.audio import Pipeline
 from pydub import AudioSegment
 
 from open_dubbing import audio_processing
 
 
-class TestCreatePyannoteTimestamps:
+class TestAudioProcessing:
+
+    def _generate_silence(self, *, output_file, silence_duration):
+        command = [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-t",
+            str(silence_duration),
+            "-q:a",
+            "9",
+            output_file,
+        ]
+        subprocess.run(command, check=True)
 
     def test_create_timestamps_with_silence(self):
+        SILENCE_DURATION = 10
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temporary_file:
-            silence_duration = 10
-            silence = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
+            self._generate_silence(
+                output_file=temporary_file.name, silence_duration=SILENCE_DURATION
             )
-            silence.write_audiofile(temporary_file.name)
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.return_value.itertracks.return_value = [
-                (MagicMock(start=0.0, end=silence_duration), None, "SPEAKER_00")
+                (MagicMock(start=0.0, end=SILENCE_DURATION), None, "SPEAKER_00")
             ]
             timestamps = audio_processing.create_pyannote_timestamps(
                 audio_file=temporary_file.name,
@@ -49,17 +62,9 @@ class TestCreatePyannoteTimestamps:
             )
             assert timestamps == [{"start": 0.0, "end": 10, "speaker_id": "SPEAKER_00"}]
 
-
-class TestCutAndSaveAudio:
-
     def test_cut_and_save_audio_no_clone(self):
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temporary_file:
-            silence_duration = 10
-            silence = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
-            )
-            silence.write_audiofile(temporary_file.name)
+            self._generate_silence(output_file=temporary_file.name, silence_duration=10)
             with tempfile.TemporaryDirectory() as output_directory:
                 audio = AudioSegment.from_file(temporary_file.name)
                 audio_processing._cut_and_save_audio(
@@ -71,17 +76,9 @@ class TestCutAndSaveAudio:
                 expected_file = os.path.join(output_directory, "chunk_0.1_0.2.mp3")
                 assert os.path.exists(expected_file)
 
-
-class TestRunCutAndSaveAudio:
-
     def test_run_cut_and_save_audio(self):
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temporary_file:
-            silence_duration = 10
-            silence = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
-            )
-            silence.write_audiofile(temporary_file.name)
+            self._generate_silence(output_file=temporary_file.name, silence_duration=10)
             utterance_metadata = [{"start": 0.0, "end": 5.0}]
             with tempfile.TemporaryDirectory() as output_directory:
                 # TODO: Add asert on results on this method
@@ -98,9 +95,6 @@ class TestRunCutAndSaveAudio:
                 }
                 assert os.path.exists(expected_file)
 
-
-class TestInsertAudioAtTimestamps:
-
     @pytest.mark.parametrize(
         "for_dubbing, expected_file_size",
         [
@@ -112,19 +106,15 @@ class TestInsertAudioAtTimestamps:
 
         with tempfile.TemporaryDirectory() as temporary_directory:
             background_audio_file = f"{temporary_directory}/test_background.mp3"
-            silence_duration = 10
-            silence = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
+            SILENCE_DURATION = 10
+
+            self._generate_silence(
+                output_file=background_audio_file, silence_duration=SILENCE_DURATION
             )
-            silence.write_audiofile(background_audio_file)
-            audio_chunk_path = f"{temporary_directory}/test_chunk.mp3"
-            chunk_duration = 2
-            chunk = AudioArrayClip(
-                np.zeros((int(44100 * chunk_duration), 2), dtype=np.int16),
-                fps=44100,
-            )
-            chunk.write_audiofile(audio_chunk_path)
+
+            data_dir = os.path.dirname(os.path.realpath(__file__))
+            audio_chunk_path = os.path.join(data_dir, "data/this_is_a_test.mp3")
+
             utterance_metadata = [
                 {
                     "start": 3.0,
@@ -144,25 +134,16 @@ class TestInsertAudioAtTimestamps:
             tolerance = 1  # Allow for a 1-byte diffence across platforms
             assert abs(expected_file_size - file_size) <= tolerance
 
-
-class TestMixMusicAndVocals:
-
     def test_mix_music_and_vocals(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             background_audio_path = f"{temporary_directory}/test_background.mp3"
             vocals_audio_path = f"{temporary_directory}/test_vocals.mp3"
-            silence_duration = 10
-            silence_background = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
+
+            self._generate_silence(
+                output_file=background_audio_path, silence_duration=10
             )
-            silence_background.write_audiofile(background_audio_path)
-            silence_duration = 5
-            silence_vocals = AudioArrayClip(
-                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-                fps=44100,
-            )
-            silence_vocals.write_audiofile(vocals_audio_path)
+            self._generate_silence(output_file=vocals_audio_path, silence_duration=5)
+
             output_audio_path = audio_processing.merge_background_and_vocals(
                 background_audio_file=background_audio_path,
                 dubbed_vocals_audio_file=vocals_audio_path,

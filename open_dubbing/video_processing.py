@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2024 Jordi Mas i Hernàndez <jmas@softcatala.org>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,8 @@
 
 import os
 import subprocess
-import warnings
 
 from typing import Final
-
-from moviepy.editor import AudioFileClip, VideoFileClip, concatenate_videoclips
 
 _DEFAULT_FPS: Final[int] = 30
 _DEFAULT_DUBBED_VIDEO_FILE: Final[str] = "dubbed_video"
@@ -29,22 +26,35 @@ class VideoProcessing:
 
     @staticmethod
     def split_audio_video(*, video_file: str, output_directory: str) -> tuple[str, str]:
-        """Splits an audio/video file into separate audio and video files."""
+        """
+        Splits an audio/video file into separate audio and video files using a single ffmpeg command.
+        """
 
         base_filename = os.path.basename(video_file)
         filename, _ = os.path.splitext(base_filename)
-        with VideoFileClip(video_file) as video_clip, warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning)
-            audio_clip = video_clip.audio
-            audio_output_file = os.path.join(output_directory, filename + "_audio.mp3")
-            audio_clip.write_audiofile(audio_output_file, verbose=False, logger=None)
-            video_clip_without_audio = video_clip.set_audio(None)
-            fps = video_clip.fps or _DEFAULT_FPS
+        audio_output_file = os.path.join(output_directory, f"{filename}_audio.mp3")
+        video_output_file = os.path.join(output_directory, f"{filename}_video.mp4")
 
-            video_output_file = os.path.join(output_directory, filename + "_video.mp4")
-            video_clip_without_audio.write_videofile(
-                video_output_file, codec="libx264", fps=fps, verbose=False, logger=None
-            )
+        command = [
+            "ffmpeg",
+            "-i",
+            video_file,  # Input video file
+            "-map",
+            "0:a:0",
+            "-b:a",
+            "128K",  # Set audio bitrate
+            audio_output_file,  # Extract audio stream to MP3
+            "-map",
+            "0:v:0",
+            "-an",
+            "-c:v",
+            "copy",
+            video_output_file,  # Extract video without audio
+        ]
+
+        with open(os.devnull, "wb") as devnull:
+            subprocess.run(command, check=True, stdout=devnull, stderr=devnull)
+
         return video_output_file, audio_output_file
 
     @staticmethod
@@ -61,17 +71,6 @@ class VideoProcessing:
           The path to the output video file with dubbed audio.
         """
 
-        video = VideoFileClip(video_file)
-        audio = AudioFileClip(dubbed_audio_file)
-        duration_difference = video.duration - audio.duration
-        if duration_difference > 0:
-            silence = AudioFileClip(duration=duration_difference).set_duration(
-                duration_difference
-            )
-            audio = concatenate_videoclips([audio, silence])
-        elif duration_difference < 0:
-            audio = audio.subclip(0, video.duration)
-        final_clip = video.set_audio(audio)
         target_language_suffix = "_" + target_language.replace("-", "_").lower()
         dubbed_video_file = os.path.join(
             output_directory,
@@ -79,15 +78,27 @@ class VideoProcessing:
             + target_language_suffix
             + _DEFAULT_OUTPUT_FORMAT,
         )
-        final_clip.write_videofile(
+
+        command = [
+            "ffmpeg",
+            "-i",
+            video_file,
+            "-i",
+            dubbed_audio_file,
+            "-c:v",
+            "copy",  # Copy the video stream (no re-encoding)
+            "-c:a",
+            "aac",  # Re-encode the audio to AAC format
+            "-map",
+            "0:v:0",  # Map the video stream from the first input (video)
+            "-map",
+            "1:a:0",  # Map the audio stream from the second input (audio)
             dubbed_video_file,
-            codec="libx264",
-            audio_codec="aac",
-            temp_audiofile="temp-audio.m4a",
-            remove_temp=True,
-            verbose=False,
-            logger=None,
-        )
+        ]
+
+        with open(os.devnull, "wb") as devnull:
+            subprocess.run(command, check=True, stdout=devnull, stderr=devnull)
+
         return dubbed_video_file
 
     @staticmethod

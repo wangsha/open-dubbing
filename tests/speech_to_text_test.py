@@ -13,33 +13,47 @@
 # limitations under the License.
 
 import os
+import subprocess
 import tempfile
 
 from collections import namedtuple
 from unittest.mock import MagicMock
 
-import numpy as np
 import pytest
 
 from faster_whisper import WhisperModel
-from moviepy.audio.AudioClip import AudioArrayClip
 
 from open_dubbing.speech_to_text_faster_whisper import SpeechToTextFasterWhisper
 
 
 class TestTranscribe:
 
+    def _generate_silence(self, *, output_file, silence_duration):
+        command = [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=channel_layout=stereo:sample_rate=44100",
+            "-t",
+            str(silence_duration),
+            "-q:a",
+            "9",
+            output_file,
+        ]
+        subprocess.run(command, check=True)
+
     @pytest.fixture(autouse=True)
     def setup(self):
         """Fixture to create and clean up the temporary audio file."""
         self.silence_audio = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
-        silence_duration = 5
-        silence = AudioArrayClip(
-            np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
-            fps=44100,
+        SILENCE_DURATION = 5
+
+        self._generate_silence(
+            output_file=self.silence_audio.name, silence_duration=SILENCE_DURATION
         )
-        silence.write_audiofile(self.silence_audio.name)
-        self.silence_audio.close()
+
         yield self.silence_audio.name
         os.remove(self.silence_audio.name)
 

@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2024 Jordi Mas i Hernàndez <jmas@softcatala.org>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,87 +15,108 @@
 """Tests for utility functions in video_processing.py."""
 
 import os
-import tempfile
+import unittest
 
-import numpy as np
-
-from moviepy.audio.AudioClip import AudioArrayClip
-from moviepy.editor import ColorClip
-from moviepy.video.compositing.CompositeVideoClip import clips_array
+from unittest.mock import MagicMock, patch
 
 from open_dubbing.video_processing import VideoProcessing
 
 
-def _create_mock_video(directory: str, video_duration: int = 5) -> str:
-    """Creates a video with red, green, and blue segments and mock audio, saves it to the directory.
+class TestVideoProcessing(unittest.TestCase):
 
-    Args:
-        directory: The directory to save the video.
-        video_duration: The duration of the video in seconds. Defaults to 5.
+    @patch("subprocess.run")
+    def test_split_audio_video(self, mock_subprocess):
+        # Mock subprocess.run to simulate ffmpeg execution without errors
+        mock_subprocess.return_value = MagicMock(returncode=0)
 
-    Returns:
-        The full path to the saved video file.
-    """
-    filename = os.path.join(directory, "mock_video.mp4")
-    red = ColorClip((256, 200), color=(255, 0, 0)).set_duration(video_duration)
-    green = ColorClip((256, 200), color=(0, 255, 0)).set_duration(video_duration)
-    blue = ColorClip((256, 200), color=(0, 0, 255)).set_duration(video_duration)
-    combined_arrays = clips_array([[red, green, blue]])
-    combined_arrays.fps = 30
-    samples = int(44100 * video_duration)
-    audio_data = np.zeros((samples, 2), dtype=np.int16)
-    audio_clip = AudioArrayClip(audio_data, fps=44100)
-    final_clip = combined_arrays.set_audio(audio_clip)
-    final_clip.write_videofile(filename, logger=None)
-    return filename
+        video_file = "sample_video.mp4"
+        output_directory = "/tmp/output"
+        expected_audio_file = os.path.join(output_directory, "sample_video_audio.mp3")
+        expected_video_file = os.path.join(output_directory, "sample_video_video.mp4")
 
+        # Call the method
+        video_output, audio_output = VideoProcessing.split_audio_video(
+            video_file=video_file, output_directory=output_directory
+        )
 
-class TestSplitAudioVideo:
+        # Assert correct output
+        self.assertEqual(video_output, expected_video_file)
+        self.assertEqual(audio_output, expected_audio_file)
 
-    def test_split_audio_video_valid_duration(self):
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            mock_video_file = _create_mock_video(temporary_directory, 5)
-            VideoProcessing.split_audio_video(
-                video_file=mock_video_file, output_directory=temporary_directory
-            )
-            assert all(
-                [
-                    os.path.exists(
-                        os.path.join(temporary_directory, "mock_video_audio.mp3")
-                    ),
-                    os.path.exists(
-                        os.path.join(temporary_directory, "mock_video_video.mp4")
-                    ),
-                ]
-            )
+        # Assert subprocess was called with the correct command
+        mock_subprocess.assert_called_once_with(
+            [
+                "ffmpeg",
+                "-i",
+                video_file,
+                "-map",
+                "0:a:0",
+                "-b:a",
+                "128K",
+                expected_audio_file,
+                "-map",
+                "0:v:0",
+                "-an",
+                "-c:v",
+                "copy",
+                expected_video_file,
+            ],
+            check=True,
+            stdout=unittest.mock.ANY,
+            stderr=unittest.mock.ANY,
+        )
 
+    @patch("subprocess.run")
+    def test_combine_audio_video(self, mock_subprocess):
+        # Mock subprocess.run to simulate ffmpeg execution without errors
+        mock_subprocess.return_value = MagicMock(returncode=0)
 
-class TestCombineAudioVideo:
+        video_file = "sample_video.mp4"
+        dubbed_audio_file = "dubbed_audio.mp3"
+        output_directory = "/tmp/output"
+        target_language = "en-US"
+        expected_output_file = os.path.join(output_directory, "dubbed_video_en_us.mp4")
 
-    def test_combine_audio_video(self):
-        with tempfile.TemporaryDirectory() as temporary_directory:
-            audio_path = f"{temporary_directory}/audio.mp3"
-            audio_duration = 5
-            audio = AudioArrayClip(
-                np.zeros((int(44100 * audio_duration), 2), dtype=np.int16),
-                fps=44100,
-            )
-            audio.write_audiofile(audio_path)
-            video_duration = 5
-            directory = temporary_directory
-            video_path = os.path.join(directory, "video.mp4")
-            red = ColorClip((256, 200), color=(255, 0, 0)).set_duration(video_duration)
-            green = ColorClip((256, 200), color=(0, 255, 0)).set_duration(
-                video_duration
-            )
-            blue = ColorClip((256, 200), color=(0, 0, 255)).set_duration(video_duration)
-            combined_arrays = clips_array([[red, green, blue]])
-            combined_arrays.fps = 30
-            combined_arrays.write_videofile(video_path)
-            output_path = VideoProcessing.combine_audio_video(
-                video_file=video_path,
-                dubbed_audio_file=audio_path,
-                output_directory=temporary_directory,
-                target_language="en-US",
-            )
-            assert os.path.exists(output_path)
+        # Call the method
+        output_file = VideoProcessing.combine_audio_video(
+            video_file=video_file,
+            dubbed_audio_file=dubbed_audio_file,
+            output_directory=output_directory,
+            target_language=target_language,
+        )
+
+        # Assert correct output
+        self.assertEqual(output_file, expected_output_file)
+
+        # Assert subprocess was called with the correct command
+        mock_subprocess.assert_called_once_with(
+            [
+                "ffmpeg",
+                "-i",
+                video_file,
+                "-i",
+                dubbed_audio_file,
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0",
+                expected_output_file,
+            ],
+            check=True,
+            stdout=unittest.mock.ANY,
+            stderr=unittest.mock.ANY,
+        )
+
+    @patch("subprocess.run")
+    def test_is_ffmpeg_installed(self, mock_subprocess):
+        # Test when ffmpeg is installed
+        mock_subprocess.return_value = MagicMock(returncode=0)
+        self.assertTrue(VideoProcessing.is_ffmpeg_installed())
+
+        # Test when ffmpeg is not installed
+        mock_subprocess.side_effect = FileNotFoundError()
+        self.assertFalse(VideoProcessing.is_ffmpeg_installed())

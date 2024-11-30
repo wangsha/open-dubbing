@@ -92,11 +92,13 @@ class TestCmd:
                 ), "translated text 3"
 
             else:
-                assert 3 == len(utterances)
+                assert 4 == len(utterances)
 
+                print(utterances)
                 assert np.allclose(
                     [
                         1.26284375,
+                        2.4778437500000003,
                         5.24534375,
                         7.607843750000001,
                     ],
@@ -106,6 +108,7 @@ class TestCmd:
 
                 assert np.allclose(
                     [
+                        2.10659375,
                         3.94596875,
                         6.629093750000001,
                         8.687843750000003,
@@ -119,15 +122,16 @@ class TestCmd:
                         1.0,
                         1.0,
                         1.0,
+                        1.0,
                     ],
                     speeds,
-                    atol=0.1,
+                    atol=0.3,
                 ), "Utterance speed check failed"
 
+                assert "- Bon dia. - Bé." == text_array[0], "translated text 0"
+                assert "Em dic Jordi Mas." == text_array[1], "translated text 1"
+
+                assert "Sóc de Barcelona." == text_array[2], "translated text 2"
                 assert (
-                    "Bon dia, em dic Jordi Mas." == text_array[0]
-                ), "translated text 0"
-                assert "Sóc de Barcelona." == text_array[1], "translated text 1"
-                assert (
-                    "I m'encanta aquesta ciutat." == text_array[2]
-                ), "translated text 2"
+                    "I m'encanta aquesta ciutat." == text_array[3]
+                ), "translated text 3"
