@@ -81,7 +81,7 @@ class TestAudioProcessing:
             self._generate_silence(output_file=temporary_file.name, silence_duration=10)
             utterance_metadata = [{"start": 0.0, "end": 5.0}]
             with tempfile.TemporaryDirectory() as output_directory:
-                # TODO: Add asert on results on this method
+                # TODO: Add assert on results on this method
                 _ = audio_processing.run_cut_and_save_audio(
                     utterance_metadata=utterance_metadata,
                     audio_file=temporary_file.name,
@@ -131,7 +131,7 @@ class TestAudioProcessing:
             file_size = os.path.getsize(output_path)
             assert os.path.exists(output_path)
 
-            tolerance = 1  # Allow for a 1-byte diffence across platforms
+            tolerance = 1  # Allow for a 1-byte difference across platforms
             assert abs(expected_file_size - file_size) <= tolerance
 
     def test_mix_music_and_vocals(self):
