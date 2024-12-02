@@ -114,4 +114,4 @@ class VideoProcessing:
                 return True
         except FileNotFoundError:
             return False
-        return True
+        return False

@@ -115,8 +115,14 @@ class TestVideoProcessing(unittest.TestCase):
     def test_is_ffmpeg_installed(self, mock_subprocess):
         # Test when ffmpeg is installed
         mock_subprocess.return_value = MagicMock(returncode=0)
-        self.assertTrue(VideoProcessing.is_ffmpeg_installed())
+        assert VideoProcessing.is_ffmpeg_installed()
 
-        # Test when ffmpeg is not installed
+    @patch("subprocess.run")
+    def test_is_ffmpeg_not_installed(self, mock_subprocess):
         mock_subprocess.side_effect = FileNotFoundError()
-        self.assertFalse(VideoProcessing.is_ffmpeg_installed())
+        assert not VideoProcessing.is_ffmpeg_installed()
+
+    @patch("subprocess.run")
+    def test_is_ffmpeg_exe_error(self, mock_subprocess):
+        mock_subprocess.return_value = MagicMock(returncode=1)
+        assert not VideoProcessing.is_ffmpeg_installed()
