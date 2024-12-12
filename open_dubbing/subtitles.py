@@ -29,7 +29,8 @@ class Subtitles:
                 end_time = str(timedelta(seconds=utterance["end"]))[:-3]
                 start_time = start_time.replace(".", ",").zfill(12)
                 end_time = end_time.replace(".", ",").zfill(12)
-                srt_content = f"{i+1}\n"
+                idx = i + 1
+                srt_content = f"{idx}\n"
                 srt_content += (
                     f"{start_time.replace('.', ',')} --> {end_time.replace('.', ',')}\n"
                 )

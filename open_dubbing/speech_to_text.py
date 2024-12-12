@@ -28,7 +28,7 @@ class SpeechToText(ABC):
 
     def __init__(self, *, model_name="medium", device="cpu", cpu_threads=0):
         self.model_name = model_name
-        self.model = None
+        self._model = None
         self.device = device
         self.cpu_threads = cpu_threads
         self.MIN_SECS = 0.5

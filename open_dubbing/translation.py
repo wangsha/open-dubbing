@@ -58,7 +58,7 @@ class Translation(ABC):
         utterance_metadata: Sequence[Mapping[str, str | float]],
         source_language: str,
         target_language: str,
-    ) -> str:
+    ) -> Sequence[Mapping[str, str | float]]:
 
         script = self._generate_script(utterance_metadata=utterance_metadata)
         translated_script = self._translate_script(

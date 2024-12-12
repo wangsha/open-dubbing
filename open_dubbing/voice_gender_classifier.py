@@ -122,7 +122,7 @@ class VoiceGenderClassifier:
         self,
         x: np.ndarray,
         sampling_rate: int,
-    ) -> np.ndarray:
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Predict age and gender from raw audio signal."""
 
         # Run through processor to normalize signal

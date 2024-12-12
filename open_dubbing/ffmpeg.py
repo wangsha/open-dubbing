@@ -23,7 +23,7 @@ from typing import List
 
 class FFmpeg:
 
-    def _run(self, *, command: str, fail: bool = True):
+    def _run(self, *, command: List[str], fail: bool = True):
         with open(os.devnull, "wb") as devnull:
             try:
                 result = subprocess.run(command, stdout=devnull, stderr=subprocess.PIPE)
@@ -128,7 +128,7 @@ class FFmpeg:
             # Add codecs for video and audio
             cmd.extend(["-c:v", "copy", "-c:a", "copy", output_file])
 
-            logging.debug(f"embbed_in_video. Command: {' '.join(cmd)}")
+            logging.debug(f"embed_subtitles. Command: {' '.join(cmd)}")
 
             # Run the command using the _run method
             self._run(command=cmd, fail=True)

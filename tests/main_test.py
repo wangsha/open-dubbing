@@ -39,7 +39,7 @@ class TestMain:
         with pytest.raises(SystemExit) as excinfo:
             _get_selected_tts("cli", "", "", "cpu")
 
-        assert excinfo.type == SystemExit
+        assert excinfo.type is SystemExit
         assert excinfo.value.code == 108
 
     def test_get_selected_tts_api(self):
@@ -50,7 +50,7 @@ class TestMain:
         with pytest.raises(SystemExit) as excinfo:
             _get_selected_tts("api", "", "", "cpu")
 
-        assert excinfo.type == SystemExit
+        assert excinfo.type is SystemExit
         assert excinfo.value.code == 110
 
     def test_get_selected_translator_apertium(self):
@@ -61,5 +61,5 @@ class TestMain:
         with pytest.raises(SystemExit) as excinfo:
             _get_selected_translator("apertium", "", "", "cpu")
 
-        assert excinfo.type == SystemExit
+        assert excinfo.type is SystemExit
         assert excinfo.value.code == 109
