@@ -92,6 +92,12 @@ class CommandLine:
             ),
         )
         parser.add_argument(
+            "--vad",
+            action="store_true",
+            help="Enable VAD filter when using faster-whisper (reduces hallucinations).",
+        )
+
+        parser.add_argument(
             "--translator",
             type=str,
             default="nllb",

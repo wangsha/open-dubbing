@@ -211,24 +211,15 @@ def main():
     if sys.platform == "darwin":
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    if args.stt == "auto":
-        if sys.platform == "darwin":
-            stt = SpeechToTextWhisperTransformers(
-                model_name=args.whisper_model,
-                device=args.device,
-                cpu_threads=args.cpu_threads,
-            )
-        else:
-            stt = SpeechToTextFasterWhisper(
-                model_name=args.whisper_model,
-                device=args.device,
-                cpu_threads=args.cpu_threads,
-            )
-    elif args.stt == "faster-whisper":
+    stt_type = args.stt
+    if stt_type == "faster-whisper" or (
+        stt_type == "auto" and sys.platform != "darwin"
+    ):
         stt = SpeechToTextFasterWhisper(
             model_name=args.whisper_model,
             device=args.device,
             cpu_threads=args.cpu_threads,
+            vad=args.vad,
         )
     else:
         stt = SpeechToTextWhisperTransformers(
@@ -236,6 +227,10 @@ def main():
             device=args.device,
             cpu_threads=args.cpu_threads,
         )
+        if args.vad:
+            logging.warning(
+                "Vad filter is only supported in fasterwhisper Speech to Text library"
+            )
 
     stt.load_model()
     source_language = args.source_language
