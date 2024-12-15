@@ -66,8 +66,8 @@ def log_error_and_exit(msg: str, code: ExitCode):
     exit(code)
 
 
-def check_languages(source_language, target_language, _tts, translation, _sst):
-    spt = _sst.get_languages()
+def check_languages(source_language, target_language, _tts, translation, _stt):
+    spt = _stt.get_languages()
     translation_languages = translation.get_language_pairs()
     logging.debug(f"check_languages. Pairs {len(translation_languages)}")
 
@@ -212,6 +212,7 @@ def main():
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
     stt_type = args.stt
+    stt_text = args.stt
     if stt_type == "faster-whisper" or (
         stt_type == "auto" and sys.platform != "darwin"
     ):
@@ -221,6 +222,8 @@ def main():
             cpu_threads=args.cpu_threads,
             vad=args.vad,
         )
+        if args.vad:
+            stt_text += " (with vad filter)"
     else:
         stt = SpeechToTextWhisperTransformers(
             model_name=args.whisper_model,
@@ -263,8 +266,9 @@ def main():
         original_subtitles=args.original_subtitles,
         dubbed_subtitles=args.dubbed_subtitles,
     )
+
     logging.info(
-        f"Processing '{args.input_file}' file with tts '{args.tts}', sst '{args.stt}' and device '{args.device}'"
+        f"Processing '{args.input_file}' file with stt '{stt_text}', tts '{args.tts}' and device '{args.device}'"
     )
     if args.update:
         dubber.update()
