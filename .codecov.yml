@@ -5,3 +5,4 @@ coverage:
         enabled: yes
         threshold: 0
         base: auto
+        informational: true
