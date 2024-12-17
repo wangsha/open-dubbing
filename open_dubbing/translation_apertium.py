@@ -14,6 +14,7 @@
 
 import json
 import logging
+import time
 import urllib
 
 from open_dubbing.translation import Translation
@@ -31,10 +32,24 @@ class TranslationApertium(Translation):
         self.server = server
 
     def _do_api_call(self, url):
-        response = urllib.request.urlopen(url)
-        r = response.read().decode("utf-8")
-        data = json.loads(r)
-        return data["responseData"]
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = urllib.request.urlopen(url)
+                r = response.read().decode("utf-8")
+                data = json.loads(r)
+                return data["responseData"]
+            except Exception:
+                if attempt == max_retries:
+                    logging.error(
+                        "translation_apertium. Max retries reached. Could not complete translation API call."
+                    )
+                    raise
+                else:
+                    logging.warning(
+                        f"translation_apertium. Could not complete translation API call, retrying attempt {attempt}."
+                    )
+                    time.sleep(30)
 
     def _translate_text(
         self, source_language: str, target_language: str, text: str
