@@ -6,3 +6,15 @@ coverage:
         threshold: 0
         base: auto
         informational: true
+    patch:
+      default:
+        enabled: yes
+        threshold: 0
+        base: auto
+        informational: true
+    changes:
+      default:
+        enabled: yes
+        threshold: 0
+        base: auto
+        informational: true
