@@ -96,14 +96,35 @@ class TestSubtitles:
             "",
         ]
 
-    def _get_srt(self):
+    def _get_utterances_small_digits(self):
         return [
+            {
+                "id": 1,
+                "start": 1,
+                "end": 3.1,
+                "text": "Good morning, my name is Jordi Mas.",
+                "translated_text": "Bon dia, el meu nom és Jordi Mas.",
+            },
+        ]
+
+    def test_write_original_small_digits(self):
+        subtitles = Subtitles()
+        srt_file = tempfile.NamedTemporaryFile(suffix=".srt", delete=False).name
+
+        directory = os.path.dirname(srt_file)
+        filename = os.path.basename(srt_file)
+        subtitles.write(
+            utterance_metadata=self._get_utterances_small_digits(),
+            directory=directory,
+            filename=filename,
+            translated=False,
+        )
+
+        lines = self._get_lines_from_file(srt_file)
+        os.remove(srt_file)
+        assert lines == [
             "1",
-            "00:00:01,262 --> 00:00:03,945",
-            "Bon dia, el meu nom és Jordi Mas.",
-            "",
-            "2",
-            "00:00:05,245 --> 00:00:06,629",
-            "Sóc de Barcelona.",
+            "00:00:01,000 --> 00:00:03,100",
+            "Good morning, my name is Jordi Mas.",
             "",
         ]
