@@ -16,7 +16,7 @@
 import os
 import tempfile
 
-from typing import Mapping
+from typing import List
 from unittest.mock import patch
 
 import pytest
@@ -49,7 +49,7 @@ class TextToSpeechUT(TextToSpeech):
     ) -> str:
         pass
 
-    def get_available_voices(self, language_code: str) -> Mapping[str, str]:
+    def get_available_voices(self, language_code: str) -> List[Voice]:
         pass
 
     def get_languages(self):
@@ -264,3 +264,31 @@ class TestTextToSpeech:
             voices=voices, target_language_region=""
         )
         assert result[0].region == "US"
+
+    def test_assign_voices(self):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = [
+            {
+                "assigned_voice": "en_voice",
+                "speaker_id": 1,
+                "gender": "Male",
+            }
+        ]
+
+        voices = [
+            Voice(name="Voice1", gender="Male", region="US"),
+            Voice(name="Voice2", gender="Female", region="UK"),
+            Voice(name="Voice3", gender="Male", region="IN"),
+            Voice(name="Voice4", gender="Female", region="IN"),
+        ]
+
+        tts = TextToSpeechUT()
+
+        with patch.object(tts, "get_available_voices", return_value=voices):
+            results = tts.assign_voices(
+                utterance_metadata=utterance_metadata,
+                target_language="",
+                target_language_region="IN",
+            )
+            assert {1: "Voice3"} == results
