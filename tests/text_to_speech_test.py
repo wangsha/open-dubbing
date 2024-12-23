@@ -17,7 +17,7 @@ import os
 import tempfile
 
 from typing import List
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -126,7 +126,7 @@ class TestTextToSpeech:
                 "start": 0,
                 "end": 5,
                 "translated_text": "Hello world",
-                "speed": 1.0,  # Initially set speed to 1.0
+                "speed": 1.0,
                 "path": "some/path/file.mp3",
             }
         ]
@@ -292,3 +292,61 @@ class TestTextToSpeech:
                 target_language_region="IN",
             )
             assert {1: "Voice3"} == results
+
+    def _get_update_utterance_metadata(self):
+        return [
+            {
+                "speaker_id": "2",
+                "start": 0,
+                "assigned_voice": "Voice0",
+                "end": 5,
+                "translated_text": "Hello world",
+                "speed": 1.0,
+                "path": "some/path/file.mp3",
+            }
+        ]
+
+    def test_update_utterance_metadata_assign_voice_from_speaker(self):
+        voices = {"1": "Voice1", "2": "Voice2"}
+
+        utterance_metadata = self._get_update_utterance_metadata()
+        tts = TextToSpeechUT()
+        updated_utterances = tts.update_utterance_metadata(
+            utterance=None,
+            utterance_metadata=utterance_metadata,
+            assigned_voices=voices,
+        )
+
+        assert "Voice2" == updated_utterances[0]["assigned_voice"]
+
+    def test_update_utterance_metadata_assign_voice_from_speaker_id(self):
+        voices = {"1": "Voice1", "2": "Voice2"}
+
+        utterance_metadata = self._get_update_utterance_metadata()
+        utterance = Mock()
+        utterance.get_modified_utterance_fields.return_value = {"speaker_id"}
+
+        tts = TextToSpeechUT()
+        updated_utterances = tts.update_utterance_metadata(
+            utterance=utterance,
+            utterance_metadata=utterance_metadata,
+            assigned_voices=voices,
+        )
+
+        assert "Voice2" == updated_utterances[0]["assigned_voice"]
+
+    def test_update_utterance_metadata_assign_voice_from_assigned_voice(self):
+        voices = {"1": "Voice1", "2": "Voice2"}
+
+        utterance_metadata = self._get_update_utterance_metadata()
+        utterance = Mock()
+        utterance.get_modified_utterance_fields.return_value = {"assigned_voice"}
+
+        tts = TextToSpeechUT()
+        updated_utterances = tts.update_utterance_metadata(
+            utterance=utterance,
+            utterance_metadata=utterance_metadata,
+            assigned_voices=voices,
+        )
+
+        assert "Voice0" == updated_utterances[0]["assigned_voice"]

@@ -102,11 +102,25 @@ class Utterance:
         except Exception as e:
             logging.warning(f"Error saving utterance metadata: {e}")
 
+    def _get_utterance_fields_to_hash(self, utterance):
+        filtered_fields = {
+            key: value for key, value in utterance.items() if not key.startswith("_")
+        }
+        return filtered_fields
+
     def _hash_utterances(self, utterance_metadata):
         for utterance in utterance_metadata:
-            dict_str = json.dumps(utterance, sort_keys=True)
+            filtered_fields = self._get_utterance_fields_to_hash(utterance)
+            dict_str = json.dumps(filtered_fields, sort_keys=True)
             _hash = hashlib.sha256(dict_str.encode()).hexdigest()
-            utterance["hash"] = _hash
+            utterance["_hash"] = _hash
+
+            for field in ["assigned_voice", "speaker_id"]:
+                value = utterance.get(field)
+                if value:
+                    utterance[f"_{field}_hash"] = hashlib.sha256(
+                        value.encode()
+                    ).hexdigest()
 
         return utterance_metadata
 
@@ -129,13 +143,28 @@ class Utterance:
 
         return paths, dubbed_paths
 
+    def get_modified_utterance_fields(self, utterance):
+        modified = []
+        for field in utterance:
+            field_hash = utterance.get(f"_{field}_hash")
+            if not field_hash:
+                continue
+
+            field_value = utterance[field]
+            current_hash = hashlib.sha256(field_value.encode()).hexdigest()
+
+            if current_hash != field_hash:
+                modified.append(field)
+
+        return modified
+
     def get_modified_utterances(self, utterance_metadata):
         modified = []
         for utterance in utterance_metadata:
-            _hash_utterance = utterance["hash"]
-            del utterance["hash"]
-            dict_str = json.dumps(utterance, sort_keys=True)
+            _hash_utterance = utterance["_hash"]
+            filtered_fields = self._get_utterance_fields_to_hash(utterance)
 
+            dict_str = json.dumps(filtered_fields, sort_keys=True)
             _hash = hashlib.sha256(dict_str.encode()).hexdigest()
             if _hash_utterance != _hash:
                 modified.append(utterance)

@@ -393,6 +393,7 @@ class Dubber:
         )
 
         modified_utterances = self.tts.update_utterance_metadata(
+            utterance=utterance,
             utterance_metadata=modified_utterances,
             assigned_voices=assigned_voices,
         )

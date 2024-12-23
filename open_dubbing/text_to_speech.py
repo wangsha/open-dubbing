@@ -21,6 +21,7 @@ from typing import Final, List, Mapping, NamedTuple, Sequence
 from pydub import AudioSegment
 
 from open_dubbing.ffmpeg import FFmpeg
+from open_dubbing.utterance import Utterance
 
 
 class Voice(NamedTuple):
@@ -106,6 +107,7 @@ class TextToSpeech(ABC):
     def update_utterance_metadata(
         self,
         *,
+        utterance: Utterance | None = None,
         utterance_metadata: Sequence[Mapping[str, str | float]],
         assigned_voices: Mapping[str, str] | None,
     ) -> Sequence[Mapping[str, str | float]]:
@@ -113,11 +115,22 @@ class TextToSpeech(ABC):
         updated_utterance_metadata = []
         for metadata_item in utterance_metadata:
             new_utterance = metadata_item.copy()
-            speaker_id = new_utterance.get("speaker_id")
-            new_utterance["assigned_voice"] = assigned_voices.get(speaker_id)
-            new_utterance = self._add_text_to_speech_properties(
-                utterance_metadata=new_utterance
+
+            fields = (
+                utterance.get_modified_utterance_fields(new_utterance)
+                if utterance
+                else []
             )
+            # If "assigned_voice" has changed we give it priority and not overwrite it
+            # by recalculating from speaker_id/gender
+            if not utterance or (
+                "speaker_id" in fields and "assigned_voice" not in fields
+            ):
+                speaker_id = new_utterance.get("speaker_id")
+                new_utterance["assigned_voice"] = assigned_voices.get(speaker_id)
+                new_utterance = self._add_text_to_speech_properties(
+                    utterance_metadata=new_utterance
+                )
             updated_utterance_metadata.append(new_utterance)
         return updated_utterance_metadata
 

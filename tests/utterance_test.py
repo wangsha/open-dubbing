@@ -50,13 +50,13 @@ class TestUterrance:
                             "id": 1,
                             "start": 1.26,
                             "end": 3.94,
-                            "hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
+                            "_hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
                         },
                         {
                             "id": 2,
                             "start": 5.24,
                             "end": 6.629,
-                            "hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
+                            "_hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
                         },
                     ],
                     "metadata": {
@@ -70,6 +70,7 @@ class TestUterrance:
             {
                 "start": 1.26,
                 "end": 3.94,
+                "_private_not_hashed": "0",
             },
             {
                 "start": 5.24,
@@ -86,12 +87,13 @@ class TestUterrance:
             {
                 "start": 1.26,
                 "end": 3.94,
-                "hash": "2fa6f80e0c81fb8e142f2dbbad0bceff7c21a031833b5752bc1cfd799f6b3bc6",
+                "_private_not_hashed": "0",
+                "_hash": "2fa6f80e0c81fb8e142f2dbbad0bceff7c21a031833b5752bc1cfd799f6b3bc6",
             },
             {
                 "start": 5.24,
                 "end": 6.629,
-                "hash": "34cd5da78cb163ad18996aefffcfeae864727257defc7ae68818a245ca269951",
+                "_hash": "34cd5da78cb163ad18996aefffcfeae864727257defc7ae68818a245ca269951",
             },
         ]
 
@@ -101,13 +103,13 @@ class TestUterrance:
                 "id": 1,
                 "start": 1.26,
                 "end": 3.94,
-                "hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
+                "_hash": "26d514d9ce21021f51bd010d9946db0f31555ef7145067d4fe5a3b1bdcd84ce7",
             },
             {
                 "id": 2,
                 "start": 5.25,
                 "end": 6.629,
-                "hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
+                "_hash": "157dc7fb355c7dc13a0ea687e9fd4a6f6c5c03526a959a64dfe1fa7562fedff4",
             },
         ]
         dubbing = Utterance(
@@ -117,6 +119,7 @@ class TestUterrance:
 
         modified = dubbing.get_modified_utterances(utterances)
         assert 1 == len(modified)
+        assert 2 == modified[0]["id"]
 
     def test_get_without_empty_blocks(self):
         utterances = [
@@ -139,6 +142,7 @@ class TestUterrance:
 
         modified = dubbing.get_without_empty_blocks(utterances)
         assert 1 == len(modified)
+        assert "Hola" == modified[0]["text"]
 
     def test_add_unique_ids(self):
 
@@ -178,7 +182,7 @@ class TestUterrance:
                 "assigned_voice": "ca-ES-EnricNeural",
                 "speed": 1.0,
                 "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_1.26284375_3.94596875.mp3",
-                "hash": "b01b399ac50f80f87e704918e290ffc5ee0a1962683ba946c627124ea903480d",
+                "_hash": "b01b399ac50f80f87e704918e290ffc5ee0a1962683ba946c627124ea903480d",
             },
             {
                 "id": 2,
@@ -193,7 +197,7 @@ class TestUterrance:
                 "assigned_voice": "ca-ES-EnricNeural",
                 "speed": 1.0,
                 "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_5.24534375_6.629093750000001.mp3",
-                "hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
+                "_hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
             },
         ]
 
@@ -241,7 +245,7 @@ class TestUterrance:
             "assigned_voice": "ca-ES-EnricNeural",
             "speed": 1.0,
             "dubbed_path": "output/jordi.central.edge.update/dubbed_chunk_5.24534375_6.629093750000001.mp3",
-            "hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
+            "_hash": "629484afdecb7641e35d686d6348cee4445611690f2f77831e892d52c3128bdd",
         }
 
     def test_load_utterances(self):
@@ -264,3 +268,46 @@ class TestUterrance:
             "original_subtitles": False,
             "dubbed_subtitles": False,
         }
+
+    def _get_utterance(self):
+        return {
+            "id": 2,
+            "start": 5.24534375,
+            "end": 6.64596875,
+            "speaker_id": "SPEAKER_00",
+            "path": "output/jordi.voices/chunk_5.24534375_6.64596875.mp3",
+            "text": "I am from Barcelona.",
+            "for_dubbing": "true",
+            "gender": "Male",
+            "translated_text": "Soc de Barcelona.",
+            "assigned_voice": "2",
+            "speed": 1.0,
+            "dubbed_path": "output/jordi.voices/dubbed_chunk_5.24534375_6.64596875.mp3",
+            "_hash": "ea1d02c92026bc8cd6144a6500489333bdf0b58368817ea5116189d101c1fe9e",
+            "_assigned_voice_hash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "_speaker_id_hash": "bf4f81ea701e475a4268bb9f36ddb43d7d5c0dbf4578fd5a24c3a8b5a375b4c9",
+        }
+
+    def test_get_modified_utterances_with_field_hashes(self):
+        utterances = [self._get_utterance()]
+        dubbing = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+
+        modified = dubbing.get_modified_utterances(utterances)
+        assert 0 == len(modified)
+
+    def test_get_modified_utterance_fields_none(self):
+        utterance = self._get_utterance()
+        u = Utterance(target_language="cat", output_directory="")
+        fields = u.get_modified_utterance_fields(utterance)
+        assert len(fields) == 0
+
+    def test_get_modified_utterance_fields_speaker_id(self):
+        utterance = self._get_utterance()
+        utterance["speaker_id"] = "SPEAKER_01"
+        u = Utterance(target_language="cat", output_directory="")
+        fields = u.get_modified_utterance_fields(utterance)
+        assert len(fields) == 1
+        assert "speaker_id" == fields[0]
