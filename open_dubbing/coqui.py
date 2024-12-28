@@ -15,6 +15,7 @@
 import logging
 import re
 import subprocess
+import warnings
 
 from TTS.api import TTS
 
@@ -23,8 +24,9 @@ class Coqui:
     """Builds a list models available per each language"""
 
     def __init__(self, device="cpu"):
-        logging.getLogger("TTS.utils.manage").setLevel(logging.ERROR)
+        logging.getLogger("TTS.utils").setLevel(logging.ERROR)
         logging.getLogger("TTS.utils.audio.processor").setLevel(logging.ERROR)
+        warnings.filterwarnings("ignore", category=FutureWarning)
         language_models = self._build_list_language_model()
         self.language_model = self._select_model_per_language(language_models)
         self.device = device
