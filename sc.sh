@@ -16,6 +16,7 @@ for input_file in "${inputs[@]}"; do
     open-dubbing \
       --input_file "$input_file" \
       --whisper_model="medium" \
+      --vad \
       --output_directory="$output_directory" \
       --target_language="$language" \
       --translator="apertium" \
