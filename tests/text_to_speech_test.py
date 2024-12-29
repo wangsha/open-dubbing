@@ -78,34 +78,6 @@ class TestTextToSpeech:
             assert result == expected_result
 
     @pytest.mark.parametrize(
-        "input_data, expected_result",
-        [
-            ([], {}),
-            (
-                [
-                    {"speaker_id": "speaker1", "vocals_path": "path/to/file1.wav"},
-                    {"speaker_id": "speaker1", "vocals_path": "path/to/file2.wav"},
-                ],
-                {"speaker1": ["path/to/file1.wav", "path/to/file2.wav"]},
-            ),
-            (
-                [
-                    {"speaker_id": "speaker1", "vocals_path": "path/to/file1.wav"},
-                    {"speaker_id": "speaker2", "vocals_path": "path/to/file3.wav"},
-                    {"speaker_id": "speaker1", "vocals_path": "path/to/file2.wav"},
-                ],
-                {
-                    "speaker1": ["path/to/file1.wav", "path/to/file2.wav"],
-                    "speaker2": ["path/to/file3.wav"],
-                },
-            ),
-        ],
-    )
-    def test_create_speaker_to_paths_mapping(self, input_data, expected_result):
-        result = TextToSpeechUT().create_speaker_to_paths_mapping(input_data)
-        assert result == expected_result
-
-    @pytest.mark.parametrize(
         "calculated_speed, expect_adjust_called, expected_final_speed",
         [
             (0.5, False, 1.0),  # Speed below 1.0 is 1.0

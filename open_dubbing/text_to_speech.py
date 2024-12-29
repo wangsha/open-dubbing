@@ -209,24 +209,6 @@ class TextToSpeech(ABC):
         logging.debug(f"text_to_speech._calculate_target_utterance_speed: {r}")
         return r
 
-    def create_speaker_to_paths_mapping(
-        self,
-        utterance_metadata: Sequence[Mapping[str, float | str]],
-    ) -> Mapping[str, Sequence[str]]:
-        """Organizes a list of utterance metadata dictionaries into a speaker-to-paths mapping.
-
-        Returns:
-            A mapping between speaker IDs to lists of file paths.
-        """
-
-        speaker_to_paths_mapping = {}
-        for utterance in utterance_metadata:
-            speaker_id = utterance["speaker_id"]
-            if speaker_id not in speaker_to_paths_mapping:
-                speaker_to_paths_mapping[speaker_id] = []
-            speaker_to_paths_mapping[speaker_id].append(utterance["vocals_path"])
-        return speaker_to_paths_mapping
-
     def _does_voice_supports_speeds(self):
         return False
 
