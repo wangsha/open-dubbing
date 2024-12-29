@@ -14,6 +14,7 @@
 
 import array
 import logging
+import re
 
 from abc import ABC, abstractmethod
 from typing import Mapping, Sequence
@@ -71,6 +72,12 @@ class SpeechToText(ABC):
     ) -> str:
         pass
 
+    # Whisper sometimes includes spaces at the begining of sentences or multiple spaces between words
+    def _make_sure_single_space(self, sentence: str) -> str:
+        fixed = re.sub(r"\s{2,}", " ", sentence)
+        fixed = fixed.strip()
+        return fixed
+
     def transcribe_audio_chunks(
         self,
         *,
@@ -99,9 +106,7 @@ class SpeechToText(ABC):
                         vocals_filepath=path,
                         source_language_iso_639_1=iso_639_1,
                     )
-                    transcribed_text = (
-                        transcribed_text.strip()
-                    )  # Whisper sometimes includes spaces at the begining of sentences
+                    transcribed_text = self._make_sure_single_space(transcribed_text)
             except Exception as e:
                 logging.error(
                     f"speech_to_text.transcribe_audio_chunks. file '{path}', error: '{e}'"

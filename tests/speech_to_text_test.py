@@ -186,3 +186,17 @@ class TestAddSpeakerInfo:
         )
 
         assert [("SPEAKER_01", "chunk_114.mp3")] == result
+
+    # Assuming the SpeechToTextFasterWhisper class is already imported
+    @pytest.mark.parametrize(
+        "input_text, expected_output",
+        [
+            ("Hello  my friends", "Hello my friends"),  # Case with two spaces
+            ("Hello    my    friends", "Hello my friends"),
+            ("Hello my friends", "Hello my friends"),
+            ("  Hello   my friends  ", "Hello my friends"),
+        ],
+    )
+    def test_make_sure_single_space(self, input_text, expected_output):
+        result = SpeechToTextFasterWhisper()._make_sure_single_space(input_text)
+        assert result == expected_output
