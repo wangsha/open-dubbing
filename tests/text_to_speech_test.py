@@ -58,7 +58,14 @@ class TextToSpeechUT(TextToSpeech):
 
 class TestTextToSpeech:
 
-    @pytest.mark.parametrize("end_block, expected_result", [(60, 1.5), (91, 1.0)])
+    @pytest.mark.parametrize(
+        "end_block, expected_result,",
+        [
+            (60, 1.5),  # Exact division
+            (91, 1.0),  # 0.98 -> rounded up (>0.5 change)
+            (95, 1.0),  # 0.94 -> rounded up (<0.5 change). Rounded down with round()
+        ],
+    )
     def test_calculate_target_utterance_speed(self, end_block, expected_result):
         DURATION = 90
 
@@ -75,7 +82,7 @@ class TestTextToSpeech:
                 dubbed_file=dubbed_file_path,
                 utterance_metadata="mocked",
             )
-            assert result == expected_result
+            assert expected_result == result
 
     @pytest.mark.parametrize(
         "calculated_speed, expect_adjust_called, expected_final_speed",

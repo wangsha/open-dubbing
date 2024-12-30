@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import math
 import os
 
 from abc import ABC, abstractmethod
@@ -205,7 +206,9 @@ class TextToSpeech(ABC):
         reference_length = end - start
         dubbed_audio = AudioSegment.from_file(dubbed_file)
         dubbed_duration = dubbed_audio.duration_seconds
-        r = round(dubbed_duration / reference_length, 1)
+        r = (
+            math.ceil(dubbed_duration / reference_length * 10) / 10
+        )  # Rounds up with .1 decimal precision
         logging.debug(f"text_to_speech._calculate_target_utterance_speed: {r}")
         return r
 
