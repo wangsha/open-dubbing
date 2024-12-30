@@ -20,7 +20,7 @@ import os
 import shutil
 import tempfile
 
-from typing import Dict, Final, List, Tuple
+from typing import Any, Dict, Final, List, Tuple
 
 from open_dubbing.preprocessing import PreprocessingArtifacts
 
@@ -41,7 +41,7 @@ class Utterance:
         )
         return utterance_metadata_file
 
-    def load_utterances(self) -> tuple[str, str, str]:
+    def load_utterances(self) -> tuple[Any, PreprocessingArtifacts, Any]:
         utterance_metadata_file = self._get_file_name()
 
         with open(utterance_metadata_file, "r") as file:
