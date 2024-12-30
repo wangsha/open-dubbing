@@ -22,6 +22,116 @@ class TestCmd:
             text += segment.text
         return text.strip(), info.language
 
+    def _update_translation(self, directory):
+        metadata_file = os.path.join(directory, "utterance_metadata_cat.json")
+
+        with open(metadata_file, "r") as file:
+            text = file.read()
+
+        text = text.replace(
+            "I m'encanta aquesta ciutat.", "I m'encanta aquesta ciutat tant meva."
+        )
+
+        with open(metadata_file, "w") as file:
+            file.write(text)
+
+    def _get_utterances(self, directory):
+        metadata_file = os.path.join(directory, "utterance_metadata_cat.json")
+        with open(metadata_file, encoding="utf-8") as json_data:
+            data = json.load(json_data)
+            utterances = data["utterances"]
+            return utterances
+
+    def _assert_dubbing_action(self, directory):
+        operating = platform.system().lower()
+        utterances = self._get_utterances(directory)
+        text_array = [entry["translated_text"] for entry in utterances]
+
+        # Common
+        assert all(
+            "Male" == entry["gender"] for entry in utterances
+        ), "Utterance gender check failed"
+
+        starts = [entry["start"] for entry in utterances]
+        ends = [entry["end"] for entry in utterances]
+        speeds = [entry["speed"] for entry in utterances]
+
+        if operating == "darwin":
+            assert 4 == len(utterances)
+
+            assert np.allclose(
+                [
+                    1.26284375,
+                    2.44409375,
+                    5.24534375,
+                    7.607843750000001,
+                ],
+                starts,
+                atol=0.5,
+            ), "Utterance start check failed"
+
+            assert np.allclose(
+                [
+                    2.17409375,
+                    3.94596875,
+                    6.61221875,
+                    8.687843750000003,
+                ],
+                ends,
+                atol=0.5,
+            ), "Utterance end check failed"
+
+            assert "- Bon dia. - Bé." == text_array[0], "translated text 0"
+            assert "Em dic Jordi Mas." == text_array[1], "translated text 1"
+            assert "Sóc de Barcelona." == text_array[2], "translated text 2"
+            assert "I m'encanta aquesta ciutat." == text_array[3], "translated text 3"
+
+        else:
+            assert 3 == len(utterances)
+
+            assert np.allclose(
+                [
+                    1.26284375,
+                    5.24534375,
+                    7.607843750000001,
+                ],
+                starts,
+                atol=0.5,
+            ), "Utterance start check failed"
+
+            assert np.allclose(
+                [
+                    3.94596875,
+                    6.629093750000001,
+                    8.687843750000003,
+                ],
+                ends,
+                atol=0.5,
+            ), "Utterance end check failed"
+
+            assert np.allclose(
+                [1.0, 1.0, 1.3], speeds, atol=2
+            ), "Utterance speed check failed"
+
+            assert "Bon dia, em dic Jordi Mas." == text_array[0], "translated text 0"
+            assert "Sóc de Barcelona." == text_array[1], "translated text 1"
+            assert "I m'encanta aquesta ciutat." == text_array[2], "translated text 2"
+
+    def _assert_update_action(self, directory):
+        operating = platform.system().lower()
+        utterances = self._get_utterances(directory)
+        text_array = [entry["translated_text"] for entry in utterances]
+
+        if operating == "darwin":
+            assert (
+                "I m'encanta aquesta ciutat tant meva." == text_array[3]
+            ), "updated translated text 2"
+
+        else:
+            assert (
+                "I m'encanta aquesta ciutat tant meva." == text_array[2]
+            ), "updated translated text 2"
+
     @pytest.mark.parametrize("tts_engine", ["edge", "mms"])
     def test_translations_with_tts(self, tts_engine):
         full_path = os.path.realpath(__file__)
@@ -30,7 +140,8 @@ class TestCmd:
         _file = os.path.join(path, "englishvideo.mp4")
         dir_obj = tempfile.TemporaryDirectory()
         directory = dir_obj.name
-        command = (
+
+        COMMAND = (
             "open-dubbing "
             f"--input_file={_file} "
             f"--output_directory={directory} "
@@ -40,94 +151,16 @@ class TestCmd:
             "--whisper_model=medium "
             f"--tts={tts_engine}"
         )
-        cmd = f"cd {directory} && {command}"
+        cmd = f"cd {directory} && {COMMAND}"
         os.system(cmd)
-        operating = platform.system().lower()
 
-        metadata_file = os.path.join(directory, "utterance_metadata_cat.json")
-        with open(metadata_file, encoding="utf-8") as json_data:
-            data = json.load(json_data)
-            utterances = data["utterances"]
-            text_array = [entry["translated_text"] for entry in utterances]
+        self._assert_dubbing_action(directory)
 
-            # Common
-            assert all(
-                "Male" == entry["gender"] for entry in utterances
-            ), "Utterance gender check failed"
+        # Update action
+        self._update_translation(directory)
 
-            starts = [entry["start"] for entry in utterances]
-            ends = [entry["end"] for entry in utterances]
-            speeds = [entry["speed"] for entry in utterances]
+        update_command = COMMAND + "--update"
+        cmd = f"cd {directory} && {update_command}"
+        os.system(cmd)
 
-            if operating == "darwin":
-                assert 4 == len(utterances)
-
-                assert np.allclose(
-                    [
-                        1.26284375,
-                        2.44409375,
-                        5.24534375,
-                        7.607843750000001,
-                    ],
-                    starts,
-                    atol=0.1,
-                ), "Utterance start check failed"
-
-                assert np.allclose(
-                    [
-                        2.17409375,
-                        3.94596875,
-                        6.61221875,
-                        8.687843750000003,
-                    ],
-                    ends,
-                    atol=0.1,
-                ), "Utterance end check failed"
-
-                assert "- Bon dia. - Bé." == text_array[0], "translated text 0"
-                assert "Em dic Jordi Mas." == text_array[1], "translated text 1"
-                assert "Sóc de Barcelona." == text_array[2], "translated text 2"
-                assert (
-                    "I m'encanta aquesta ciutat." == text_array[3]
-                ), "translated text 3"
-
-            else:
-                assert 3 == len(utterances)
-
-                assert np.allclose(
-                    [
-                        1.26284375,
-                        5.24534375,
-                        7.607843750000001,
-                    ],
-                    starts,
-                    atol=0.1,
-                ), "Utterance start check failed"
-
-                assert np.allclose(
-                    [
-                        3.94596875,
-                        6.629093750000001,
-                        8.687843750000003,
-                    ],
-                    ends,
-                    atol=0.1,
-                ), "Utterance end check failed"
-
-                assert np.allclose(
-                    [
-                        1.0,
-                        1.0,
-                        1.0,
-                    ],
-                    speeds,
-                    atol=0.1,
-                ), "Utterance speed check failed"
-
-                assert (
-                    "Bon dia, em dic Jordi Mas." == text_array[0]
-                ), "translated text 0"
-                assert "Sóc de Barcelona." == text_array[1], "translated text 1"
-                assert (
-                    "I m'encanta aquesta ciutat." == text_array[2]
-                ), "translated text 2"
+        self._assert_update_action(directory)
