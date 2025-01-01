@@ -84,6 +84,32 @@ class TestTextToSpeech:
             )
             assert expected_result == result
 
+    def _get_dub_metadata(self):
+        return [
+            {
+                "id": 1,
+                "for_dubbing": True,
+                "assigned_voice": "en_voice",
+                "start": 0,
+                "end": 5,
+                "translated_text": "Hello world",
+                "speed": 1.0,
+                "path": "some/path/file.mp3",
+                "dubbed_path": "dubbed_file_path",
+            },
+            {
+                "id": 2,
+                "for_dubbing": True,
+                "assigned_voice": "en_voice",
+                "start": 5,
+                "end": 10,
+                "translated_text": "How are you?",
+                "speed": 1.0,
+                "path": "some/path/file.mp3",
+                "dubbed_path": "dubbed_file_path",
+            },
+        ].copy()
+
     @pytest.mark.parametrize(
         "calculated_speed, expect_adjust_called, expected_final_speed",
         [
@@ -98,21 +124,12 @@ class TestTextToSpeech:
         tts = TextToSpeechUT()
 
         # Mock dependencies
-        utterance_metadata = [
-            {
-                "for_dubbing": True,
-                "assigned_voice": "en_voice",
-                "start": 0,
-                "end": 5,
-                "translated_text": "Hello world",
-                "speed": 1.0,
-                "path": "some/path/file.mp3",
-            }
-        ]
-        output_directory = "/output"
-        target_language = "en"
+        utterance_metadata = self._get_dub_metadata()
+        del utterance_metadata[1]
 
-        # Mock methods
+        output_directory = "/output"
+        target_language = "eng"
+
         with patch.object(
             tts, "_does_voice_supports_speeds", return_value=False
         ), patch.object(
@@ -139,6 +156,122 @@ class TestTextToSpeech:
                 mock_adjust_speed.assert_not_called()
 
             assert result[0]["speed"] == expected_final_speed
+
+    def test_dub_utterances_modified_no_modification(self):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = self._get_dub_metadata()
+        output_directory = "/output"
+        target_language = "eng"
+
+        with patch.object(
+            tts, "_does_voice_supports_speeds", return_value=False
+        ), patch.object(
+            tts, "_convert_text_to_speech", return_value="dubbed_file_path"
+        ), patch.object(
+            tts,
+            "_convert_text_to_speech_without_end_silence",
+            return_value="dubbed_file_path",
+        ), patch(
+            "open_dubbing.ffmpeg.FFmpeg.adjust_audio_speed"
+        ) as mock_adjust_speed, patch.object(
+            tts, "_calculate_target_utterance_speed", return_value=1.0
+        ):
+            result = tts.dub_utterances(
+                utterance_metadata=utterance_metadata,
+                output_directory=output_directory,
+                target_language=target_language,
+                audio_file="",
+                modified_metadata=[],
+            )
+
+            mock_adjust_speed.assert_not_called()
+            assert result == utterance_metadata
+
+    def test_dub_utterances_modified_one_modification_increase_speed(self):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = self._get_dub_metadata()
+        update_metadata = self._get_dub_metadata()
+        del update_metadata[0]
+
+        output_directory = "/output"
+        target_language = "eng"
+        NEW_SPEED = 1.1
+
+        # Mock methods
+        with patch.object(
+            tts, "_does_voice_supports_speeds", return_value=False
+        ), patch.object(
+            tts, "_convert_text_to_speech", return_value="dubbed_file_path"
+        ), patch.object(
+            tts,
+            "_convert_text_to_speech_without_end_silence",
+            return_value="dubbed_file_path",
+        ), patch(
+            "open_dubbing.ffmpeg.FFmpeg.adjust_audio_speed"
+        ) as mock_adjust_speed, patch.object(
+            tts, "_calculate_target_utterance_speed", return_value=NEW_SPEED
+        ):
+            result = tts.dub_utterances(
+                utterance_metadata=utterance_metadata,
+                output_directory=output_directory,
+                target_language=target_language,
+                audio_file="",
+                modified_metadata=update_metadata,
+            )
+
+            expected_medata = update_metadata.copy()
+            expected_medata[0]["speed"] = NEW_SPEED
+            mock_adjust_speed.assert_called()
+
+            assert utterance_metadata[0] == result[0]
+            assert expected_medata[0] == result[1]
+
+    def test_dub_utterances_modified_one_modification_decrease_speed(self):
+        tts = TextToSpeechUT()
+
+        # Mock dependencies
+        utterance_metadata = self._get_dub_metadata()
+        utterance_metadata[1]["speed"] = "1.2"
+        print(f"utterance_metadata: {utterance_metadata}")
+
+        update_metadata = self._get_dub_metadata()
+        del update_metadata[0]
+        print(f"update_metadata: {update_metadata}")
+
+        output_directory = "/output"
+        target_language = "eng"
+        NEW_SPEED = 1.0
+
+        # Mock methods
+        with patch.object(
+            tts, "_does_voice_supports_speeds", return_value=False
+        ), patch.object(
+            tts, "_convert_text_to_speech", return_value="dubbed_file_path"
+        ), patch.object(
+            tts,
+            "_convert_text_to_speech_without_end_silence",
+            return_value="dubbed_file_path",
+        ), patch(
+            "open_dubbing.ffmpeg.FFmpeg.adjust_audio_speed"
+        ) as mock_adjust_speed, patch.object(
+            tts, "_calculate_target_utterance_speed", return_value=NEW_SPEED
+        ):
+            result = tts.dub_utterances(
+                utterance_metadata=utterance_metadata,
+                output_directory=output_directory,
+                target_language=target_language,
+                audio_file="",
+                modified_metadata=update_metadata,
+            )
+
+            expected_medata = update_metadata.copy()
+            expected_medata[0]["speed"] = NEW_SPEED
+            mock_adjust_speed.assert_not_called()
+
+            assert utterance_metadata[0] == result[0]
+            assert expected_medata[0] == result[1]
 
     @pytest.mark.parametrize(
         "test_name, utterance_metadata, expected_result",

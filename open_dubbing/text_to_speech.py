@@ -262,13 +262,21 @@ class TextToSpeech(ABC):
         output_directory: str,
         target_language: str,
         audio_file: str,
-        adjust_speed: bool = True,
+        modified_metadata: Sequence[Mapping[str, str | float]] | None = None,
     ) -> Sequence[Mapping[str, str | float]]:
         """Processes a list of utterance metadata, generating dubbed audio files."""
 
-        logging.debug(f"TextToSpeech.dub_utterances: adjust_speed: {adjust_speed}")
+        modified_ids = {}
+        if modified_metadata is not None:
+            modified_ids = {utterance["id"] for utterance in modified_metadata}
+
         updated_utterance_metadata = []
         for utterance in utterance_metadata:
+            if modified_metadata is not None and utterance["id"] not in modified_ids:
+                utterance_copy = utterance.copy()
+                updated_utterance_metadata.append(utterance_copy)
+                continue
+
             utterance_copy = utterance.copy()
             if not utterance_copy["for_dubbing"]:
                 try:
@@ -349,6 +357,8 @@ class TextToSpeech(ABC):
                         logging.debug(
                             f"text_to_speech.adjust_audio_speed: dubbed_audio: {dubbed_path}, speed: {speed}"
                         )
+                else:
+                    utterance_copy["speed"] = self._DEFAULT_SPEED
 
             utterance_copy["dubbed_path"] = dubbed_path
             updated_utterance_metadata.append(utterance_copy)

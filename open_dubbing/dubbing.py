@@ -284,7 +284,6 @@ class Dubber:
             output_directory=self.output_directory,
             target_language=self.target_language,
             audio_file=self.preprocessing_output.audio_file,
-            adjust_speed=True,
         )
 
     def run_cleaning(self) -> None:
@@ -383,7 +382,7 @@ class Dubber:
                 )
                 exit(ExitCode.UPDATE_MISSING_FILES)
 
-        # Update voices in case they have changed
+        # Update voices in case voices, text or time has changed
         modified_utterances = utterance.get_modified_utterances(self.utterance_metadata)
 
         assigned_voices = self.tts.assign_voices(
@@ -398,12 +397,12 @@ class Dubber:
             assigned_voices=assigned_voices,
         )
 
-        self.tts.dub_utterances(
-            utterance_metadata=modified_utterances,
+        self.utterance_metadata = self.tts.dub_utterances(
+            utterance_metadata=self.utterance_metadata,
             output_directory=self.output_directory,
             target_language=self.target_language,
             audio_file=self.preprocessing_output.audio_file,
-            adjust_speed=True,
+            modified_metadata=modified_utterances,
         )
         times["tts"] = self.log_debug_task_and_getime(
             "Text to speech completed", task_start_time
