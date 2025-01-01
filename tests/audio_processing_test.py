@@ -29,7 +29,7 @@ from pydub import AudioSegment
 from open_dubbing import audio_processing
 
 
-class TestCreatePyannoteTimestamps:
+class TestAudioProcessing:
 
     def test_create_timestamps_with_silence(self):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temporary_file:
@@ -49,9 +49,6 @@ class TestCreatePyannoteTimestamps:
             )
             assert timestamps == [{"start": 0.0, "end": 10, "speaker_id": "SPEAKER_00"}]
 
-
-class TestCutAndSaveAudio:
-
     def test_cut_and_save_audio_no_clone(self):
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temporary_file:
             silence_duration = 10
@@ -70,9 +67,6 @@ class TestCutAndSaveAudio:
                 )
                 expected_file = os.path.join(output_directory, "chunk_0.1_0.2.mp3")
                 assert os.path.exists(expected_file)
-
-
-class TestRunCutAndSaveAudio:
 
     def test_run_cut_and_save_audio(self):
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temporary_file:
@@ -97,9 +91,6 @@ class TestRunCutAndSaveAudio:
                     "end": 5.0,
                 }
                 assert os.path.exists(expected_file)
-
-
-class TestInsertAudioAtTimestamps:
 
     @pytest.mark.parametrize(
         "for_dubbing, expected_file_size",
@@ -144,9 +135,6 @@ class TestInsertAudioAtTimestamps:
             tolerance = 1  # Allow for a 1-byte difference across platforms
             assert abs(expected_file_size - file_size) <= tolerance
 
-
-class TestMixMusicAndVocals:
-
     def test_mix_music_and_vocals(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             background_audio_path = f"{temporary_directory}/test_background.mp3"
@@ -170,3 +158,27 @@ class TestMixMusicAndVocals:
                 target_language="en-US",
             )
             assert os.path.exists(output_audio_path)
+
+    def test_needs_background_normalization_yes(self):
+        data_dir = os.path.dirname(os.path.realpath(__file__))
+        filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
+        needs, max_amplitude = audio_processing._needs_background_normalization(
+            background_audio_file=filename
+        )
+        assert needs
+        assert 1.0 == max_amplitude
+
+    def test_needs_background_normalization_no(self):
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temporary_file:
+            silence_duration = 5
+            silence = AudioArrayClip(
+                np.zeros((int(44100 * silence_duration), 2), dtype=np.int16),
+                fps=44100,
+            )
+            silence.write_audiofile(temporary_file.name)
+
+            needs, max_amplitude = audio_processing._needs_background_normalization(
+                background_audio_file=temporary_file.name
+            )
+            assert not needs
+            assert 0 == max_amplitude
