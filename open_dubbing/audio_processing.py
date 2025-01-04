@@ -222,7 +222,7 @@ def merge_background_and_vocals(
     )
     if needs:
         logging.info(
-            f"merge_background_and_vocals. Normalizing background (max amplitude {max_amplitude})"
+            f"merge_background_and_vocals. Normalizing background (max amplitude {max_amplitude:.2f})"
         )
         background = background.normalize()
 
