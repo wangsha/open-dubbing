@@ -516,5 +516,12 @@ class Dubber:
             logging.info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
 
         self.log_maxrss_memory()
+        if logging.getLogger().getEffectiveLevel() == logging.getLevelName("DEBUG"):
+            self.stt.dump_transcriptions(
+                output_directory=self.output_directory,
+                utterance_metadata=self.utterance_metadata,
+            )
+
         logging.info("Output files saved in: %s.", self.output_directory)
+
         return self.postprocessing_output

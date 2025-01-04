@@ -14,6 +14,7 @@
 
 import array
 import logging
+import os
 import re
 
 from abc import ABC, abstractmethod
@@ -210,3 +211,17 @@ class SpeechToText(ABC):
             return True
 
         return False
+
+    def dump_transcriptions(
+        self,
+        *,
+        output_directory: str,
+        utterance_metadata: str,
+    ) -> None:
+
+        output_filename = os.path.join(output_directory, "transcription.txt")
+
+        with open(output_filename, "w") as _file:
+            for utterance in utterance_metadata:
+                text = utterance["text"]
+                _file.write(text + "\n")
