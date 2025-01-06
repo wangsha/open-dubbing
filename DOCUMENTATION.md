@@ -7,7 +7,8 @@ usage: open-dubbing [-h] --input_file INPUT_FILE
                     [--output_directory OUTPUT_DIRECTORY]
                     [--source_language SOURCE_LANGUAGE] --target_language
                     TARGET_LANGUAGE [--hugging_face_token HUGGING_FACE_TOKEN]
-                    [--tts {mms,coqui,edge,cli,api}]
+                    [--tts {mms,coqui,openai,edge,cli,api}]
+                    [--openai_api_key OPENAI_API_KEY]
                     [--stt {auto,faster-whisper,transformers}] [--vad]
                     [--translator {nllb,apertium}]
                     [--apertium_server APERTIUM_SERVER] [--device {cpu,cuda}]
@@ -35,16 +36,21 @@ options:
                         Target language for dubbing (ISO 639-3).
   --hugging_face_token HUGGING_FACE_TOKEN
                         Hugging Face API token.
-  --tts {mms,coqui,edge,cli,api}
+  --tts {mms,coqui,openai,edge,cli,api}
                         Text to Speech engine to use. Choices are:
                         'mms': Meta Multilingual Speech engine, supports +1100
                         languages.
                         'coqui': Coqui TTS, an open-source alternative for
                         high-quality TTS.
+                        'openai': OpenAI TTS.
                         'edge': Microsoft Edge TSS.
                         'cli': User defined TTS invoked from command line.
                         'api': Implements a user defined TTS API contract to
                         enable non supported TTS.
+  --openai_api_key OPENAI_API_KEY
+                        OpenAI API key used for OpenAI TTS defined by passing
+                        this argument or having environment variable the
+                        OPENAI_API_KEY defined
   --stt {auto,faster-whisper,transformers}
                         Speech to text. Choices are:
                         'auto': Autoselect best implementation.

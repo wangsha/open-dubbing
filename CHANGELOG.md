@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.8]
+
+### Added
+- Support for OpenAI TTS
+### Fixed
+- When updating an existing dubbing, use all the utterances to allow to calculate again propery speed changes.
+- Normalize audio background only when it is necessary to avoid when possible residual vocals
+
 ## [0.1.7]
 
 ### Fixed
