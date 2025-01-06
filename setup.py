@@ -43,6 +43,7 @@ setup(
     extras_require={
         "dev": ["flake8==7.*", "black==24.*", "pytest==8.*", "isort==5.13"],
         "coqui": ["coqui-tts >= 0.25.1"],
+        "openai": ["openai == 1.59.3"],
     },
     entry_points={
         "console_scripts": [

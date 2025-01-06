@@ -69,15 +69,21 @@ class CommandLine:
             "--tts",
             type=str,
             default="mms",
-            choices=["mms", "coqui", "edge", "cli", "api"],
+            choices=["mms", "coqui", "openai", "edge", "cli", "api"],
             help=(
                 "Text to Speech engine to use. Choices are:\n"
                 "'mms': Meta Multilingual Speech engine, supports +1100 languages.\n"
                 "'coqui': Coqui TTS, an open-source alternative for high-quality TTS.\n"
+                "'openai': OpenAI TTS.\n"
                 "'edge': Microsoft Edge TSS.\n"
                 "'cli': User defined TTS invoked from command line.\n"
                 "'api': Implements a user defined TTS API contract to enable non supported TTS.\n"
             ),
+        )
+        parser.add_argument(
+            "--openai_api_key",
+            default=None,
+            help="OpenAI API key used for OpenAI TTS defined by passing this argument or having environment variable the OPENAI_API_KEY defined",
         )
         parser.add_argument(
             "--stt",

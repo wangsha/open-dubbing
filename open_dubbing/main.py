@@ -135,7 +135,11 @@ def list_supported_languages(_tts, translation, device):  # TODO: Not used
 
 
 def _get_selected_tts(
-    selected_tts: str, tts_cli_cfg_file: str, tts_api_server: str, device: str
+    selected_tts: str,
+    tts_cli_cfg_file: str,
+    tts_api_server: str,
+    device: str,
+    openai_api_key: str,
 ):
     if selected_tts == "mms":
         tts = TextToSpeechMMS(device)
@@ -164,7 +168,15 @@ def _get_selected_tts(
         if len(tts_api_server) == 0:
             msg = "When using TTS's API, you need to specify with --tts_api_server the URL of the server"
             log_error_and_exit(msg, ExitCode.NO_TTS_API_SERVER)
+    elif selected_tts == "openai":
+        try:
+            from open_dubbing.text_to_speech_openai import TextToSpeechOpenAI
+        except Exception:
+            msg = "Make sure that OpenAI library is installed by running 'pip install open-dubbing[openai]'"
+            log_error_and_exit(msg, ExitCode.NO_OPENAI_TTS)
 
+        key = _get_openai_key(key=openai_api_key)
+        tts = TextToSpeechOpenAI(device=device, api_key=key)
     else:
         raise ValueError(f"Invalid tts value {selected_tts}")
 
@@ -191,6 +203,19 @@ def _get_selected_translator(
     return translation
 
 
+def _get_openai_key(*, key: str):
+    if key:
+        return key
+
+    VAR = "OPENAI_API_KEY"
+    key = os.getenv(VAR)
+    if key:
+        return key
+
+    msg = f"OpenAI TTS selected but no key has been pass as argument or defined in the environment variable {VAR}"
+    log_error_and_exit(msg, ExitCode.NO_OPENAI_KEY)
+
+
 def main():
 
     args = CommandLine.read_parameters()
@@ -205,7 +230,11 @@ def main():
         log_error_and_exit(msg, ExitCode.NO_FFMPEG)
 
     tts = _get_selected_tts(
-        args.tts, args.tts_cli_cfg_file, args.tts_api_server, args.device
+        args.tts,
+        args.tts_cli_cfg_file,
+        args.tts_api_server,
+        args.device,
+        args.openai_api_key,
     )
 
     if sys.platform == "darwin":

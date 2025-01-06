@@ -183,6 +183,7 @@ Core libraries used:
   * [coqui-tts](https://github.com/idiap/coqui-ai-TTS)
   * Meta [mms](https://github.com/facebookresearch/fairseq/tree/main/examples/mms)
   * Microsoft [Edge TTS](https://github.com/rany2/edge-tts)
+  * [OpenAI TTS](https://platform.openai.com/docs/guides/text-to-speech)
 
 And very special thanks to [ariel](https://github.com/google-marketing-solutions/ariel) from which we leveraged parts of their code base.
 
