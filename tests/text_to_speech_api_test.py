@@ -62,13 +62,11 @@ class TestTextToSpeechAPI:
         mock_requests_get.return_value = MockResponse(
             bytes("dummy", "utf-8"), status_code=200
         )
-        output_filename = "None"
 
-        # Call the method to test
         tts_api._convert_text_to_speech(
             assigned_voice="test_voice",
             target_language="en",
-            output_filename=output_filename,
+            output_filename="None",
             text="Hello, world!",
             speed=1.0,
         )
@@ -78,4 +76,33 @@ class TestTextToSpeechAPI:
             "http://dummyserver.com/speak?voice=test_voice&text=Hello, world!"
         )
         mock_requests_get.assert_called_once_with(expected_url)
+        assert mock_convert_to_mp3.called
+
+    @mock.patch("time.sleep", return_value=None)
+    @mock.patch("requests.get")
+    @mock.patch.object(TextToSpeechAPI, "_convert_to_mp3")
+    def test_convert_text_to_speech_with_one_retry(
+        self, mock_convert_to_mp3, mock_requests_get, _
+    ):
+        tts_api = TextToSpeechAPI(server="http://dummyserver.com")
+
+        mock_requests_get.side_effect = [
+            MockResponse(bytes("dummy", "utf-8"), status_code=500),
+            MockResponse(bytes("dummy", "utf-8"), status_code=200),
+        ]
+
+        tts_api._convert_text_to_speech(
+            assigned_voice="test_voice",
+            target_language="en",
+            output_filename="None",
+            text="Hello, world!",
+            speed=1.0,
+        )
+
+        # Ensure requests.get was called twice with the correct URL
+        expected_url = (
+            "http://dummyserver.com/speak?voice=test_voice&text=Hello, world!"
+        )
+        assert mock_requests_get.call_count == 2
+        mock_requests_get.assert_called_with(expected_url)
         assert mock_convert_to_mp3.called

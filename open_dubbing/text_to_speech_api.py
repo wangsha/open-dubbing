@@ -14,6 +14,7 @@
 
 import logging
 import tempfile
+import time
 
 from typing import List
 from urllib.parse import urljoin
@@ -75,21 +76,38 @@ class TextToSpeechAPI(TextToSpeech):
 
         url = urljoin(self.server, "/speak")
         url = f"{url}?voice={assigned_voice}&text={text}"
-        response = requests.get(url)
 
-        temp_filename = None
-        with tempfile.NamedTemporaryFile(delete=False) as temporary_file:
-            temp_filename = temporary_file.name
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = requests.get(url)
 
-            if response.status_code == 200:
-                with open(temp_filename, "wb") as f:
-                    f.write(response.content)
-            else:
-                logging.error(
-                    f"Failed to download the file. Status code: {response.status_code}"
-                )
+                temp_filename = None
+                with tempfile.NamedTemporaryFile(delete=False) as temporary_file:
+                    temp_filename = temporary_file.name
 
-            self._convert_to_mp3(temp_filename, output_filename)
+                    if response.status_code == 200:
+                        with open(temp_filename, "wb") as f:
+                            f.write(response.content)
+                    else:
+                        response.raise_for_status()
+
+                    self._convert_to_mp3(temp_filename, output_filename)
+                    break
+            except Exception:
+                if attempt == max_retries:
+                    logging.error(
+                        f"text_to_speech_api._convert_text_to_speech. Failed to download the file. Status code: {response.status_code}"
+                    )
+                    logging.error(
+                        "text_to_speech_api._convert_text_to_speech. Max retries reached. Could not complete translation API call."
+                    )
+                    raise
+                else:
+                    logging.warning(
+                        f"text_to_speech_api._convert_text_to_speech. Could not complete translation API call, retrying attempt {attempt}."
+                    )
+                    time.sleep(30)
 
         logging.debug(
             f"text_to_speech_api._convert_text_to_speech: assigned_voice: {assigned_voice}, output_filename: '{output_filename}'"
