@@ -33,7 +33,7 @@ class TextToSpeechMMS(TextToSpeech):
         logging.getLogger("transformers").setLevel(logging.ERROR)
 
     def get_available_voices(self, language_code: str) -> List[Voice]:
-        return []
+        return [Voice(name="voice", gender=self._SSML_MALE)]
 
     def _convert_text_to_speech(
         self,
