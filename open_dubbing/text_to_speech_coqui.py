@@ -24,6 +24,8 @@ from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 class TextToSpeechCoqui(TextToSpeech):
 
+    DEFAULT_VOICE = "default"
+
     def __init__(self, device="cpu"):
         super().__init__()
         self.coqui = Coqui(device)
@@ -48,6 +50,8 @@ class TextToSpeechCoqui(TextToSpeech):
         if language_code == "cat":
             voices.append(Voice(name="pau", gender="Male"))
             voices.append(Voice(name="ona", gender="Female"))
+        else:
+            voices.append(Voice(name=self.DEFAULT_VOICE, gender="Male"))
 
         logging.debug(
             f"text_to_speech_coqui.get_available_voices: {voices} for language {language_code}"
@@ -63,6 +67,9 @@ class TextToSpeechCoqui(TextToSpeech):
         text: str,
         speed: float,
     ) -> str:
+
+        if assigned_voice == self.DEFAULT_VOICE:
+            assigned_voice = None
 
         wav_file = output_filename.replace(".mp3", ".wav")
         logging.debug(

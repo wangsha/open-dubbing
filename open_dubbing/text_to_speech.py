@@ -71,19 +71,16 @@ class TextToSpeech(ABC):
         )
 
         voice_assignment = {}
-        if len(voices) == 0:
-            voice_assignment["speaker_01"] = "ona"
-        else:
-            for chunk in utterance_metadata:
-                speaker_id = chunk["speaker_id"]
-                if speaker_id in voice_assignment:
-                    continue
+        for chunk in utterance_metadata:
+            speaker_id = chunk["speaker_id"]
+            if speaker_id in voice_assignment:
+                continue
 
-                gender = chunk["gender"]
-                for voice in voices:
-                    if voice.gender.lower() == gender.lower():
-                        voice_assignment[speaker_id] = voice.name
-                        break
+            gender = chunk["gender"]
+            for voice in voices:
+                if voice.gender.lower() == gender.lower():
+                    voice_assignment[speaker_id] = voice.name
+                    break
 
         logging.info(f"text_to_speech.assign_voices. Returns: {voice_assignment}")
         return voice_assignment
