@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import array
-import logging
 
 import numpy as np
 
 from faster_whisper import WhisperModel
 
+from open_dubbing import logger
 from open_dubbing.speech_to_text import SpeechToText
 
 
@@ -27,7 +27,6 @@ class SpeechToTextFasterWhisper(SpeechToText):
     def __init__(self, *, model_name="medium", device="cpu", cpu_threads=0, vad=False):
         super().__init__(device=device, model_name=model_name, cpu_threads=cpu_threads)
         self.vad = vad
-        logging.getLogger("faster_whisper").setLevel(logging.ERROR)
 
     def load_model(self):
         self._model = WhisperModel(
@@ -59,7 +58,7 @@ class SpeechToTextFasterWhisper(SpeechToText):
         audio_input = np.array(audio).astype(np.float32) / 32768.0
         _, info = self.model.transcribe(audio_input)
         detected_language = self._get_iso_639_3(info.language)
-        logging.debug(
+        logger().debug(
             f"speech_to_text_faster_whisper._get_audio_language. Detected language: {detected_language}"
         )
         return detected_language

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import logging
 import re
 
 from typing import List
@@ -24,6 +23,7 @@ from edge_tts import VoicesManager, list_voices
 from edge_tts.exceptions import NoAudioReceived
 from iso639 import Lang
 
+from open_dubbing import logger
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 
@@ -46,7 +46,7 @@ class TextToSpeechEdge(TextToSpeech):
         edge_voices = voice_manager.find(Language=iso_639_1)
         for edge_voice in edge_voices:
             if not all(key in edge_voice for key in ["ShortName", "Gender", "Locale"]):
-                logging.warning(
+                logger().warning(
                     f"Skipping voice '{edge_voice}' since is missing some fields"
                 )
                 continue
@@ -57,11 +57,11 @@ class TextToSpeechEdge(TextToSpeech):
                 region=edge_voice["Locale"],
             )
             voices.append(voice)
-            logging.debug(
+            logger().debug(
                 f'shortname: {edge_voice["ShortName"]}, gender: {edge_voice["Gender"]}, locale: {edge_voice["Locale"]}'
             )
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_edge.get_available_voices: {voices} for language {language_code}"
         )
 
@@ -86,12 +86,12 @@ class TextToSpeechEdge(TextToSpeech):
                 return
             except NoAudioReceived:
                 if attempt == max_retries:
-                    logging.error(
+                    logger().error(
                         "text_to_speech_edge._save. Max retries reached. Could not save audio."
                     )
                     raise
                 else:
-                    logging.warning(
+                    logger().warning(
                         f"text_to_speech_edge._save. No audio received, retrying attempt {attempt}."
                     )
                     await asyncio.sleep(30)
@@ -107,7 +107,7 @@ class TextToSpeechEdge(TextToSpeech):
     ) -> str:
 
         asyncio.run(self._save(text, speed, assigned_voice, output_filename))
-        logging.debug(
+        logger().debug(
             f"text_to_speech.client_edge.synthesize_speech: assigned_voice: {assigned_voice}, output_filename: '{output_filename}'"
         )
         return output_filename
@@ -132,5 +132,5 @@ class TextToSpeechEdge(TextToSpeech):
 
             locales.add(iso_639_3)
         languages = sorted(locales)
-        logging.debug(f"text_to_speech.client_edge.get_languages: {languages}'")
+        logger().debug(f"text_to_speech.client_edge.get_languages: {languages}'")
         return languages

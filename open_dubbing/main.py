@@ -15,11 +15,13 @@
 import logging
 import os
 import sys
+import warnings
 
 import transformers
 
 from iso639 import Lang
 
+from open_dubbing import logger
 from open_dubbing.command_line import CommandLine
 from open_dubbing.dubbing import Dubber
 from open_dubbing.exit_code import ExitCode
@@ -37,9 +39,12 @@ from open_dubbing.translation_nllb import TranslationNLLB
 
 
 def _init_logging(log_level):
-    # Create a logger
-    logger = logging.getLogger()
-    logger.setLevel(log_level)  # Set the global log level
+    logging.basicConfig(level=logging.ERROR)  # Suppress third-party loggers
+
+    # Create your application logger
+    app_logger = logging.getLogger("open_dubbing")
+    app_logger.setLevel(log_level)
+    app_logger.propagate = False
 
     # File handler for logging to a file
     file_handler = logging.FileHandler("open_dubbing.log")
@@ -47,29 +52,25 @@ def _init_logging(log_level):
 
     # Formatter for log messages
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-
-    # Set formatter for both handlers
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
-    # Add handlers to the logger
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
+    app_logger.addHandler(file_handler)
+    app_logger.addHandler(console_handler)
 
-    logging.getLogger("pydub.converter").setLevel(logging.ERROR)
-    logging.getLogger("speechbrain").setLevel(logging.ERROR)
     transformers.logging.set_verbosity_error()
+    warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 def log_error_and_exit(msg: str, code: ExitCode):
-    logging.error(msg)
+    logger().error(msg)
     exit(code)
 
 
 def check_languages(source_language, target_language, _tts, translation, _stt):
     spt = _stt.get_languages()
     translation_languages = translation.get_language_pairs()
-    logging.debug(f"check_languages. Pairs {len(translation_languages)}")
+    logger().debug(f"check_languages. Pairs {len(translation_languages)}")
 
     tts = _tts.get_languages()
 
@@ -260,7 +261,7 @@ def main():
             cpu_threads=args.cpu_threads,
         )
         if args.vad:
-            logging.warning(
+            logger().warning(
                 "Vad filter is only supported in fasterwhisper Speech to Text library"
             )
 
@@ -268,7 +269,7 @@ def main():
     source_language = args.source_language
     if not source_language:
         source_language = stt.detect_language(args.input_file)
-        logging.info(f"Detected language '{source_language}'")
+        logger().info(f"Detected language '{source_language}'")
 
     translation = _get_selected_translator(
         args.translator, args.nllb_model, args.apertium_server, args.device
@@ -296,7 +297,7 @@ def main():
         dubbed_subtitles=args.dubbed_subtitles,
     )
 
-    logging.info(
+    logger().info(
         f"Processing '{args.input_file}' file with stt '{stt_text}', tts '{args.tts}' and device '{args.device}'"
     )
     if args.update:

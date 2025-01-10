@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-import logging
 import os
 import warnings
 
@@ -25,6 +24,8 @@ import torch
 from moviepy import AudioFileClip
 from pyannote.audio import Pipeline
 from pydub import AudioSegment
+
+from open_dubbing import logger
 
 _DEFAULT_DUBBED_VOCALS_AUDIO_FILE: Final[str] = "dubbed_vocals.mp3"
 _DEFAULT_DUBBED_AUDIO_FILE: Final[str] = "dubbed_audio"
@@ -135,13 +136,13 @@ def insert_audio_at_timestamps(
             if for_dubbing is False:
                 start = int(item["start"])
                 end = int(item["end"])
-                logging.debug(
+                logger().debug(
                     f"insert_audio_at_timestamps. Skipping {_file} at start time {start} and end at {end}"
                 )
                 continue
 
             start_time = int(item["start"] * 1000)
-            logging.debug(f"insert_audio_at_timestamps. Open: {_file}")
+            logger().debug(f"insert_audio_at_timestamps. Open: {_file}")
             audio_chunk = AudioSegment.from_mp3(_file)
             output_audio = output_audio.overlay(
                 audio_chunk, position=start_time, loop=False
@@ -149,7 +150,7 @@ def insert_audio_at_timestamps(
         except Exception as e:
             start = int(item["start"])
             end = int(item["end"])
-            logging.error(
+            logger().error(
                 f"insert_audio_at_timestamps. Error on file: {_file} at start time {start} and end at {end}, error: {e}"
             )
 
@@ -183,13 +184,13 @@ def _needs_background_normalization(
             max_amplitude = max(max_amplitude, chunk_amplitude)
 
         needs = max_amplitude > threshold
-        logging.debug(
+        logger().debug(
             f"_needs_background_normalization. max_amplitude: {max_amplitude}, needs {needs}"
         )
         return needs, max_amplitude
 
     except Exception as e:
-        logging.error(f"_needs_background_normalization. Error: {e}")
+        logger().error(f"_needs_background_normalization. Error: {e}")
         return True, 1.0
 
     finally:
@@ -221,7 +222,7 @@ def merge_background_and_vocals(
         background_audio_file=background_audio_file
     )
     if needs:
-        logging.info(
+        logger().info(
             f"merge_background_and_vocals. Normalizing background (max amplitude {max_amplitude:.2f})"
         )
         background = background.normalize()

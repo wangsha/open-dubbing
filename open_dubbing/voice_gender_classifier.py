@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 
 import numpy as np
@@ -26,6 +25,8 @@ from transformers.models.wav2vec2.modeling_wav2vec2 import (
     Wav2Vec2Model,
     Wav2Vec2PreTrainedModel,
 )
+
+from open_dubbing import logger
 
 
 class ModelHead(nn.Module):
@@ -162,12 +163,12 @@ class VoiceGenderClassifier:
             _, gender_logits = self._predict(signal, sampling_rate)
             predicted_gender = self._interpret_gender(gender_logits)
         except Exception as e:
-            logging.error(
+            logger().error(
                 f"voice_gender_classifier. get_gender_for_file. Error '{e}' processing {file_path}"
             )
             predicted_gender = self.FEMALE
 
-        logging.debug(
+        logger().debug(
             f"The audio from {os.path.basename(file_path)} is predicted {predicted_gender}"
         )
         return predicted_gender

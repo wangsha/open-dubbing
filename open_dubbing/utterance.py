@@ -15,13 +15,13 @@
 import dataclasses
 import hashlib
 import json
-import logging
 import os
 import shutil
 import tempfile
 
 from typing import Any, Dict, Final, List, Tuple
 
+from open_dubbing import logger
 from open_dubbing.preprocessing import PreprocessingArtifacts
 
 
@@ -95,12 +95,12 @@ class Utterance:
                 os.fsync(temporary_file.fileno())
             shutil.copy(temporary_file.name, utterance_metadata_file)
             os.remove(temporary_file.name)
-            logging.debug(
+            logger().debug(
                 "Utterance metadata saved successfully to"
                 f" '{utterance_metadata_file}'"
             )
         except Exception as e:
-            logging.warning(f"Error saving utterance metadata: {e}")
+            logger().warning(f"Error saving utterance metadata: {e}")
 
     def _get_utterance_fields_to_hash(self, utterance):
         filtered_fields = {
@@ -169,7 +169,7 @@ class Utterance:
             if _hash_utterance != _hash:
                 modified.append(utterance)
 
-        logging.info(f"Modified {len(modified)} utterances")
+        logger().info(f"Modified {len(modified)} utterances")
         return modified
 
     def get_without_empty_blocks(self, utterance_metadata):
@@ -178,7 +178,7 @@ class Utterance:
         for utterance in utterance_metadata:
             text = utterance["text"]
             if len(text) == 0:
-                logging.debug(f"Removing empty block: {utterance}")
+                logger().debug(f"Removing empty block: {utterance}")
                 continue
 
             new_utterance.append(utterance)

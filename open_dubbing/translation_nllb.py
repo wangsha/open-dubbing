@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, pipeline
 
+from open_dubbing import logger
 from open_dubbing.translation import Translation
 
 
@@ -59,7 +58,7 @@ class TranslationNLLB(Translation):
             )
         except RuntimeError as e:
             if self.device == "cuda":
-                logging.warning(
+                logger().warning(
                     f"Loading translation model {self.model_name} in CPU since cannot be load in GPU"
                 )
                 return AutoModelForSeq2SeqLM.from_pretrained(self.model_name).to("cpu")

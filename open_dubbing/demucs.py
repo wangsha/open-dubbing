@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 import re
 import subprocess
 import sys
+
+from open_dubbing import logger
 
 
 class Demucs:
@@ -101,7 +102,7 @@ class Demucs:
             result = subprocess.run(
                 command, shell=True, capture_output=True, text=True, check=True
             )
-            logging.debug(result.stdout)
+            logger().debug(result.stdout)
         except subprocess.CalledProcessError as error:
             raise Exception(
                 f"Error in attempt to separate audio: {error}\n{error.stderr}"

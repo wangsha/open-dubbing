@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import os
 import shutil
 import subprocess
 import tempfile
 
 from typing import List
+
+from open_dubbing import logger
 
 
 class FFmpeg:
@@ -30,7 +31,7 @@ class FFmpeg:
                 if result.returncode != 0:
                     raise subprocess.CalledProcessError(result.returncode, command)
             except subprocess.CalledProcessError as e:
-                logging.error(
+                logger().error(
                     f"Error running command: {command} failed with exit code {e.returncode} and output '{result.stderr}'"
                 )
                 if fail:
@@ -128,7 +129,7 @@ class FFmpeg:
             # Add codecs for video and audio
             cmd.extend(["-c:v", "copy", "-c:a", "copy", output_file])
 
-            logging.debug(f"embed_subtitles. Command: {' '.join(cmd)}")
+            logger().debug(f"embed_subtitles. Command: {' '.join(cmd)}")
 
             # Run the command using the _run method
             self._run(command=cmd, fail=False)

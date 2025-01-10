@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import math
 import os
 
@@ -21,6 +20,7 @@ from typing import Final, List, Mapping, NamedTuple, Sequence
 
 from pydub import AudioSegment
 
+from open_dubbing import logger
 from open_dubbing.ffmpeg import FFmpeg
 from open_dubbing.utterance import Utterance
 
@@ -82,7 +82,7 @@ class TextToSpeech(ABC):
                     voice_assignment[speaker_id] = voice.name
                     break
 
-        logging.info(f"text_to_speech.assign_voices. Returns: {voice_assignment}")
+        logger().info(f"text_to_speech.assign_voices. Returns: {voice_assignment}")
         return voice_assignment
 
     def _convert_to_mp3(self, input_file, output_mp3):
@@ -164,7 +164,7 @@ class TextToSpeech(ABC):
         dubbed_audio = AudioSegment.from_file(dubbed_file)
         post_duration = len(dubbed_audio)
         if pre_duration != post_duration:
-            logging.debug(
+            logger().debug(
                 f"text_to_speech._convert_text_to_speech_without_end_silence. File {dubbed_file} shorten from {pre_duration} to {post_duration}"
             )
 
@@ -206,7 +206,7 @@ class TextToSpeech(ABC):
         r = (
             math.ceil(dubbed_duration / reference_length * 10) / 10
         )  # Rounds up with .1 decimal precision
-        logging.debug(f"text_to_speech._calculate_target_utterance_speed: {r}")
+        logger().debug(f"text_to_speech._calculate_target_utterance_speed: {r}")
         return r
 
     def _does_voice_supports_speeds(self):
@@ -237,17 +237,17 @@ class TextToSpeech(ABC):
             try:
                 background_audio = AudioSegment.from_mp3(audio_file)
                 total_duration = background_audio.duration_seconds
-                logging.debug(
+                logger().debug(
                     f"get_start_time_of_next_speech_utterance. File duration: {total_duration}"
                 )
                 result = total_duration
             except Exception as e:
-                logging.error(f"Error '{e}' reading {audio_file}")
+                logger().error(f"Error '{e}' reading {audio_file}")
 
         if not result:
             result = end
 
-        logging.debug(
+        logger().debug(
             f"get_start_time_of_next_speech_utterance from_time: {start}, result: {result}"
         )
         return result
@@ -317,23 +317,23 @@ class TextToSpeech(ABC):
                     audio_file=audio_file,
                 )
 
-                logging.debug(f"support_speeds: {support_speeds}, speed: {speed}")
+                logger().debug(f"support_speeds: {support_speeds}, speed: {speed}")
 
                 if speed > 1.0:
                     translated_text = utterance_copy["translated_text"]
-                    logging.debug(
+                    logger().debug(
                         f"text_to_speech.dub_utterances. Need to increase speed for '{translated_text}'"
                     )
 
                     MAX_SPEED = 1.3
                     if speed > MAX_SPEED:
-                        logging.debug(
+                        logger().debug(
                             f"text_to_speech.dub_utterances: Reduced speed from {speed} to {MAX_SPEED}"
                         )
                         speed = MAX_SPEED
 
                     translated_text = utterance_copy["translated_text"]
-                    logging.debug(
+                    logger().debug(
                         f"text_to_speech.dub_utterances: Adjusting speed to {speed} for '{translated_text}'"
                     )
 
@@ -351,7 +351,7 @@ class TextToSpeech(ABC):
                             filename=dubbed_path,
                             speed=speed,
                         )
-                        logging.debug(
+                        logger().debug(
                             f"text_to_speech.adjust_audio_speed: dubbed_audio: {dubbed_path}, speed: {speed}"
                         )
                 else:

@@ -13,11 +13,11 @@
 # limitations under the License.
 
 import json
-import logging
 import os
 
 from typing import List
 
+from open_dubbing import logger
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 
@@ -49,7 +49,7 @@ class TextToSpeechCLI(TextToSpeech):
             )
             voices.append(voice)
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_cli.get_available_voices: {voices} for language {language_code}"
         )
         return voices
@@ -99,7 +99,7 @@ class TextToSpeechCLI(TextToSpeech):
         )
         self._convert_to_mp3(wav_file, output_filename)
 
-        logging.debug(f"text_to_speech_cli._convert_text_to_speech: {text}")
+        logger().debug(f"text_to_speech_cli._convert_text_to_speech: {text}")
         return output_filename
 
     def get_languages(self):
@@ -110,5 +110,5 @@ class TextToSpeechCLI(TextToSpeech):
 
         languages_list = list(languages)
 
-        logging.debug(f"text_to_speech_cli.get_languages: {languages_list}")
+        logger().debug(f"text_to_speech_cli.get_languages: {languages_list}")
         return languages_list

@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import json
-import logging
 import time
 import urllib
 
+from open_dubbing import logger
 from open_dubbing.translation import Translation
 
 
@@ -41,12 +41,12 @@ class TranslationApertium(Translation):
                 return data["responseData"]
             except Exception:
                 if attempt == max_retries:
-                    logging.error(
+                    logger().error(
                         "translation_apertium. Max retries reached. Could not complete translation API call."
                     )
                     raise
                 else:
-                    logging.warning(
+                    logger().warning(
                         f"translation_apertium. Could not complete translation API call, retrying attempt {attempt}."
                     )
                     time.sleep(30)
@@ -73,7 +73,7 @@ class TranslationApertium(Translation):
             source = pair["sourceLanguage"]
             target = pair["targetLanguage"]
             if len(source) != 3 or len(target) != 3:
-                logging.warning(
+                logger().warning(
                     f"Discarding Apertium language pair: '{source}-{target}'"
                 )
                 continue

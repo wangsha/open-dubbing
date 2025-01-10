@@ -13,12 +13,13 @@
 # limitations under the License.
 
 import json
-import logging
 import re
 import time
 
 from abc import ABC, abstractmethod
 from typing import Final, Mapping, Sequence
+
+from open_dubbing import logger
 
 _BREAK_MARKER: Final[str] = "<BREAK>"
 
@@ -37,9 +38,9 @@ class Translation(ABC):
         trimmed_lines = [
             item[key].strip() if item[key] else "" for item in utterance_metadata
         ]
-        logging.debug(f"translation.generate_script. Input: {trimmed_lines}")
+        logger().debug(f"translation.generate_script. Input: {trimmed_lines}")
         r = _BREAK_MARKER + _BREAK_MARKER.join(trimmed_lines) + _BREAK_MARKER
-        logging.debug(f"translation.generate_script. Returns: {r}")
+        logger().debug(f"translation.generate_script. Returns: {r}")
         return r
 
     @abstractmethod
@@ -86,8 +87,8 @@ class Translation(ABC):
 
         start_time = time.time()
 
-        logging.debug(f"translation.translate_script. Input script: {script}")
-        logging.debug(
+        logger().debug(f"translation.translate_script. Input script: {script}")
+        logger().debug(
             f"translation.translate_script. Input source_language: {source_language}, target_language: {target_language}"
         )
 
@@ -108,12 +109,12 @@ class Translation(ABC):
             translated_parts.append(translation)
 
         translation = _BREAK_MARKER.join(translated_parts)
-        logging.debug(f"translation.translate_script. Translation: {translation}")
+        logger().debug(f"translation.translate_script. Translation: {translation}")
 
         pretty_data = json.dumps(translation, indent=4, ensure_ascii=False)
-        logging.debug(f"translation.translate_script. Returns: {pretty_data}")
+        logger().debug(f"translation.translate_script. Returns: {pretty_data}")
         execution_time = time.time() - start_time
-        logging.debug(
+        logger().debug(
             "translation.translate_script. Time: %.2f seconds.", execution_time
         )
 
@@ -145,6 +146,6 @@ class Translation(ABC):
         pretty_data = json.dumps(
             updated_utterance_metadata, indent=4, ensure_ascii=False
         )
-        logging.debug(f"translation.translated_script. Input: {translated_script}")
-        logging.debug(f"translation.translated_script. Returns: {pretty_data}")
+        logger().debug(f"translation.translated_script. Input: {translated_script}")
+        logger().debug(f"translation.translated_script. Returns: {pretty_data}")
         return updated_utterance_metadata

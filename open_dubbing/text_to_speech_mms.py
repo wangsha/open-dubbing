@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from typing import List
 
 import numpy as np
@@ -22,6 +20,7 @@ import torch
 
 from transformers import AutoTokenizer, VitsModel
 
+from open_dubbing import logger
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 
@@ -30,7 +29,6 @@ class TextToSpeechMMS(TextToSpeech):
     def __init__(self, device="cpu"):
         super().__init__()
         self.device = device
-        logging.getLogger("transformers").setLevel(logging.ERROR)
 
     def get_available_voices(self, language_code: str) -> List[Voice]:
         return [Voice(name="voice", gender=self._SSML_MALE)]
@@ -45,7 +43,7 @@ class TextToSpeechMMS(TextToSpeech):
         speed: float,
     ) -> str:
 
-        logging.debug(f"TextToSpeechMMS._convert_text_to_speech: {text}")
+        logger().debug(f"TextToSpeechMMS._convert_text_to_speech: {text}")
         local_files_only = False
 
         # Load pre-trained model and tokenizer
@@ -75,7 +73,7 @@ class TextToSpeechMMS(TextToSpeech):
         scipy.io.wavfile.write(wav_file, rate=sampling_rate, data=output_np)
 
         self._convert_to_mp3(wav_file, output_filename)
-        logging.debug(
+        logger().debug(
             f"text_to_speech.client.synthesize_speech: output_filename: '{output_filename}'"
         )
         return output_filename

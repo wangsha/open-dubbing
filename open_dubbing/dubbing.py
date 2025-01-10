@@ -28,7 +28,7 @@ import torch
 
 from pyannote.audio import Pipeline
 
-from open_dubbing import audio_processing
+from open_dubbing import audio_processing, logger
 from open_dubbing.demucs import Demucs
 from open_dubbing.exit_code import ExitCode
 from open_dubbing.ffmpeg import FFmpeg
@@ -134,7 +134,7 @@ class Dubber:
     def input_file(self):
         renamed_input_file = rename_input_file(self._input_file)
         if renamed_input_file != self._input_file:
-            logging.warning(
+            logger().warning(
                 "The input file was renamed because the original name contained"
                 " spaces, hyphens, or other incompatible characters. The updated"
                 f" input file is: {renamed_input_file}"
@@ -154,13 +154,13 @@ class Dubber:
         if sys.platform == "darwin":
             return max_rss_self / 1024
 
-        logging.info(f"Maximum memory used: {max_rss_self:.0f} MB")
+        logger().info(f"Maximum memory used: {max_rss_self:.0f} MB")
 
     def log_debug_task_and_getime(self, text, start_time):
         process = psutil.Process(os.getpid())
         current_rss = process.memory_info().rss / 1024**2
         _time = time.time() - start_time
-        logging.info(
+        logger().info(
             f"Completed task '{text}': current_rss {current_rss:.2f} MB, time {_time:.2f}s"
         )
         return _time
@@ -174,7 +174,7 @@ class Dubber:
 
     def _verify_api_access(self) -> None:
         """Verifies access to all the required APIs."""
-        logging.debug("Verifying access to PyAnnote from HuggingFace.")
+        logger().debug("Verifying access to PyAnnote from HuggingFace.")
         if not self.pyannote_pipeline:
             raise PyAnnoteAccessError(
                 "No access to HuggingFace. Make sure you passed the correct API token"
@@ -185,7 +185,7 @@ class Dubber:
                 " diarization model"
                 " (https://huggingface.co/pyannote/speaker-diarization-3.1)."
             )
-        logging.debug("Access to PyAnnote from HuggingFace verified.")
+        logger().debug("Access to PyAnnote from HuggingFace verified.")
 
     def run_preprocessing(self) -> None:
         """Splits audio/video, applies DEMUCS, and segments audio into utterances with PyAnnote."""
@@ -360,7 +360,7 @@ class Dubber:
         start_time = time.time()
         task_start_time = time.time()
 
-        logging.info("Update dubbing process started")
+        logger().info("Update dubbing process started")
 
         try:
             utterance = Utterance(self.target_language, self.output_directory)
@@ -368,7 +368,7 @@ class Dubber:
                 utterance.load_utterances()
             )
         except Exception as e:
-            logging.error(
+            logger().error(
                 f"Unable to read metadata at '{self.output_directory}. "
                 f"Cannot find a previous execution to update. Error: '{e}'"
             )
@@ -377,7 +377,7 @@ class Dubber:
         _, dubbed_paths = utterance.get_files_paths(self.utterance_metadata)
         for path in dubbed_paths:
             if not os.path.exists(path):
-                logging.error(
+                logger().error(
                     f"Cannot do update operation since file '{path}' is missing."
                 )
                 exit(ExitCode.UPDATE_MISSING_FILES)
@@ -415,16 +415,16 @@ class Dubber:
         times["postprocessing"] = self.log_debug_task_and_getime(
             "Post processing completed", task_start_time
         )
-        logging.info("Dubbing process finished.")
+        logger().info("Dubbing process finished.")
         total_time = time.time() - start_time
-        logging.info(f"Total execution time: {total_time:.2f} secs")
+        logger().info(f"Total execution time: {total_time:.2f} secs")
         for task in times:
             _time = times[task]
             per = _time * 100 / total_time
-            logging.info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
+            logger().info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
 
         self.log_maxrss_memory()
-        logging.info("Output files saved in: %s.", self.output_directory)
+        logger().info("Output files saved in: %s.", self.output_directory)
 
     def run_generate_subtitles(self):
         if not self.original_subtitles and not self.dubbed_subtitles:
@@ -464,12 +464,12 @@ class Dubber:
             subtitles_files=subtitles_files,
             languages_iso_639_3=languages_iso_639_3,
         )
-        logging.info(f"Generated subtitles for languages {languages_iso_639_3}")
+        logger().info(f"Generated subtitles for languages {languages_iso_639_3}")
 
     def dub(self) -> PostprocessingArtifacts:
         """Orchestrates the entire dubbing process."""
         self._verify_api_access()
-        logging.info("Dubbing process starting...")
+        logger().info("Dubbing process starting...")
         times = {}
         start_time = time.time()
 
@@ -478,7 +478,7 @@ class Dubber:
         times["preprocessing"] = self.log_debug_task_and_getime(
             "Preprocessing completed", task_start_time
         )
-        logging.info("Speech to text...")
+        logger().info("Speech to text...")
         task_start_time = time.time()
         self.run_speech_to_text()
         times["stt"] = self.log_debug_task_and_getime(
@@ -507,21 +507,21 @@ class Dubber:
         times["postprocessing"] = self.log_debug_task_and_getime(
             "Post processing completed", task_start_time
         )
-        logging.info("Dubbing process finished.")
+        logger().info("Dubbing process finished.")
         total_time = time.time() - start_time
-        logging.info(f"Total execution time: {total_time:.2f} secs")
+        logger().info(f"Total execution time: {total_time:.2f} secs")
         for task in times:
             _time = times[task]
             per = _time * 100 / total_time
-            logging.info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
+            logger().info(f" Task '{task}' in {_time:.2f} secs ({per:.2f}%)")
 
         self.log_maxrss_memory()
-        if logging.getLogger().getEffectiveLevel() == logging.getLevelName("DEBUG"):
+        if logger().getEffectiveLevel() == logging.getLevelName("DEBUG"):
             self.stt.dump_transcriptions(
                 output_directory=self.output_directory,
                 utterance_metadata=self.utterance_metadata,
             )
 
-        logging.info("Output files saved in: %s.", self.output_directory)
+        logger().info("Output files saved in: %s.", self.output_directory)
 
         return self.postprocessing_output

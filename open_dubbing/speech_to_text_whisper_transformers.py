@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import array
-import logging
 
 import numpy as np
 import torch
@@ -21,6 +20,7 @@ import torch
 from pydub import AudioSegment
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
+from open_dubbing import logger
 from open_dubbing.speech_to_text import SpeechToText
 
 
@@ -62,7 +62,7 @@ class SpeechToTextWhisperTransformers(SpeechToText):
         transcription = self._processor.batch_decode(
             generated_ids, skip_special_tokens=True
         )[0]
-        logging.debug(
+        logger().debug(
             f"speech_to_text_whisper_transfomers._transcribe. transcription: {transcription}, file {vocals_filepath}"
         )
         return transcription
@@ -89,7 +89,7 @@ class SpeechToTextWhisperTransformers(SpeechToText):
                 if (len(token) == 2 or len(token) == 3) and token.isalpha():
                     detected_language = self._get_iso_639_3(token)
                     break
-        logging.debug(
+        logger().debug(
             f"speech_to_text_whisper_transfomers._get_audio_language. Detected language: {detected_language}"
         )
 

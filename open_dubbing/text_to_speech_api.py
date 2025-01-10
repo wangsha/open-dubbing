@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import tempfile
 import time
 
@@ -21,6 +20,7 @@ from urllib.parse import urljoin
 
 import requests
 
+from open_dubbing import logger
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 
@@ -55,7 +55,7 @@ class TextToSpeechAPI(TextToSpeech):
             )
             voices.append(voice)
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_api.get_available_voices: {voices} for language {language_code}"
         )
 
@@ -96,20 +96,20 @@ class TextToSpeechAPI(TextToSpeech):
                     break
             except Exception:
                 if attempt == max_retries:
-                    logging.error(
+                    logger().error(
                         f"text_to_speech_api._convert_text_to_speech. Failed to download the file. Status code: {response.status_code}"
                     )
-                    logging.error(
+                    logger().error(
                         "text_to_speech_api._convert_text_to_speech. Max retries reached. Could not complete translation API call."
                     )
                     raise
                 else:
-                    logging.warning(
+                    logger().warning(
                         f"text_to_speech_api._convert_text_to_speech. Could not complete translation API call, retrying attempt {attempt}."
                     )
                     time.sleep(30)
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_api._convert_text_to_speech: assigned_voice: {assigned_voice}, output_filename: '{output_filename}'"
         )
         return output_filename
@@ -121,5 +121,5 @@ class TextToSpeechAPI(TextToSpeech):
             languages.add(language)
 
         languages = sorted(list(languages))
-        logging.debug(f"text_to_speech_api.get_languages: {languages}")
+        logger().debug(f"text_to_speech_api.get_languages: {languages}")
         return languages

@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
 from typing import List
 
 from openai import OpenAI
 
+from open_dubbing import logger
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 
@@ -28,8 +27,6 @@ class TextToSpeechOpenAI(TextToSpeech):
         super().__init__()
         self.client = OpenAI()
         self.client.api_key = api_key
-        logging.getLogger("openai").setLevel(logging.ERROR)
-        logging.getLogger("httpx").setLevel(logging.ERROR)
 
     def get_available_voices(self, language_code: str) -> List[Voice]:
 
@@ -53,7 +50,7 @@ class TextToSpeechOpenAI(TextToSpeech):
             )
             voices.append(voice)
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_openai.get_available_voices: {voices} for language {language_code}"
         )
 
@@ -72,7 +69,7 @@ class TextToSpeechOpenAI(TextToSpeech):
         speed: float,
     ) -> str:
 
-        logging.debug(
+        logger().debug(
             f"text_to_speech_openai._convert_text_to_speech: assigned_voice: {assigned_voice}, output_filename: '{output_filename}'"
         )
         response = self.client.audio.speech.create(
@@ -147,5 +144,5 @@ class TextToSpeechOpenAI(TextToSpeech):
         ]
 
         languages = sorted(list(languages))
-        logging.debug(f"text_to_speech_openai.get_languages: {languages}")
+        logger().debug(f"text_to_speech_openai.get_languages: {languages}")
         return languages
