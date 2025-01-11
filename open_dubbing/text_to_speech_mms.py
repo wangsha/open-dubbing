@@ -29,9 +29,18 @@ class TextToSpeechMMS(TextToSpeech):
     def __init__(self, device="cpu"):
         super().__init__()
         self.device = device
+        self.model = None
+        self.tokenizer = None
 
     def get_available_voices(self, language_code: str) -> List[Voice]:
         return [Voice(name="voice", gender=self._SSML_MALE)]
+
+    def unload_model(self):
+        logger().info("Unload model")
+        del self.tokenizer
+        self.tokenizer = None
+        del self.model
+        self.model = None
 
     def _convert_text_to_speech(
         self,
@@ -47,17 +56,20 @@ class TextToSpeechMMS(TextToSpeech):
         local_files_only = False
 
         # Load pre-trained model and tokenizer
-        model = VitsModel.from_pretrained(
-            f"facebook/mms-tts-{target_language}", local_files_only=local_files_only
-        ).to(self.device)
-        tokenizer = AutoTokenizer.from_pretrained(
-            f"facebook/mms-tts-{target_language}", local_files_only=local_files_only
-        )
-        inputs = tokenizer(text, return_tensors="pt").to(self.device)
+        if not self.model:
+            self.model = VitsModel.from_pretrained(
+                f"facebook/mms-tts-{target_language}", local_files_only=local_files_only
+            ).to(self.device)
+
+        if not self.tokenizer:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                f"facebook/mms-tts-{target_language}", local_files_only=local_files_only
+            )
+        inputs = self.tokenizer(text, return_tensors="pt").to(self.device)
 
         # Generate waveform
         with torch.no_grad():
-            output = model(**inputs).waveform
+            output = self.model(**inputs).waveform
 
         # Convert waveform to NumPy array and scale to 16-bit PCM
         # Assuming `output` is a 2D tensor with shape (batch_size, samples)
@@ -66,7 +78,7 @@ class TextToSpeechMMS(TextToSpeech):
         output_np = (output_np * 32767).astype(np.int16)  # Scale to 16-bit PCM
 
         # Get the sampling rate
-        sampling_rate = model.config.sampling_rate
+        sampling_rate = self.model.config.sampling_rate
 
         # Write to WAV file
         wav_file = output_filename.replace(".mp3", ".wav")

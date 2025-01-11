@@ -38,6 +38,9 @@ class TextToSpeech(ABC):
         self._SSML_FEMALE: Final[str] = "Female"
         self._DEFAULT_SPEED: Final[float] = 1.0
 
+    def unload_model():
+        pass
+
     @abstractmethod
     def get_available_voices(self, language_code: str) -> List[Voice]:
         pass

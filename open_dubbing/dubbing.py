@@ -285,6 +285,7 @@ class Dubber:
             target_language=self.target_language,
             audio_file=self.preprocessing_output.audio_file,
         )
+        self.tts.unload_model()
 
     def run_cleaning(self) -> None:
         if not self.clean_intermediate_files:
