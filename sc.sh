@@ -21,9 +21,7 @@ for input_file in "${inputs[@]}"; do
       --target_language="$language" \
       --translator="apertium" \
       --apertium_server=http://localhost:8500/ \
-      --tts=api \
-      --tts_api_server=http://localhost:8100/ \
-      --target_language_region="central" \
+      --tts=mms \
       --device=cpu \
       --dubbed_subtitles\
       --log_level=INFO
