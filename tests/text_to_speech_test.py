@@ -353,7 +353,7 @@ class TestTextToSpeech:
             )
             assert result == expected_result
 
-    def test_get_voices_with_region_filter(self):
+    def test_get_voices_for_region_only(self):
         voices = [
             Voice(name="Voice1", gender="Male", region="US"),
             Voice(name="Voice2", gender="Female", region="UK"),
@@ -361,28 +361,38 @@ class TestTextToSpeech:
             Voice(name="Voice4", gender="Female", region="IN"),
         ]
 
-        result = TextToSpeechUT().get_voices_with_region_preference(
+        result = TextToSpeechUT().get_voices_for_region_only(
             voices=voices, target_language_region="UK"
         )
-        assert result[0].region == "UK"
+        assert 1 == len(result)
+        assert "UK" == result[0].region
 
-        result = TextToSpeechUT().get_voices_with_region_preference(
+        result = TextToSpeechUT().get_voices_for_region_only(
             voices=voices, target_language_region="IN"
         )
-        assert result[0].region == "IN"
-        assert result[1].region == "IN"
 
-        result = TextToSpeechUT().get_voices_with_region_preference(
+        assert 2 == len(result)
+        assert "IN" == result[0].region
+        assert "IN" == result[1].region
+
+        result = TextToSpeechUT().get_voices_for_region_only(
             voices=voices, target_language_region=""
         )
-        assert result[0].region == "US"
+        assert 4 == len(result)
+        assert "US" == result[0].region
 
-    def test_assign_voices(self):
+    @pytest.mark.parametrize(
+        "target_language_region, expected_voices",
+        [
+            ("IN", {1: "Voice3"}),
+            ("", {1: "Voice1"}),
+        ],
+    )
+    def test_assign_voices_single_male(self, target_language_region, expected_voices):
         tts = TextToSpeechUT()
 
         utterance_metadata = [
             {
-                "assigned_voice": "en_voice",
                 "speaker_id": 1,
                 "gender": "Male",
             }
@@ -401,9 +411,124 @@ class TestTextToSpeech:
             results = tts.assign_voices(
                 utterance_metadata=utterance_metadata,
                 target_language="",
-                target_language_region="IN",
+                target_language_region=target_language_region,
             )
-            assert {1: "Voice3"} == results
+            assert expected_voices == results
+
+    @pytest.mark.parametrize(
+        "target_language_region, expected_voices",
+        [
+            ("IN", {1: "Voice2"}),
+            ("", {1: "Voice1"}),
+        ],
+    )
+    def test_assign_voices_single_male_no_male_voice(
+        self, target_language_region, expected_voices
+    ):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = [
+            {
+                "speaker_id": 1,
+                "gender": "Male",
+            }
+        ]
+
+        voices = [
+            Voice(name="Voice1", gender="Female", region="UK"),
+            Voice(name="Voice2", gender="Female", region="IN"),
+        ]
+
+        tts = TextToSpeechUT()
+
+        with patch.object(tts, "get_available_voices", return_value=voices):
+            results = tts.assign_voices(
+                utterance_metadata=utterance_metadata,
+                target_language="",
+                target_language_region=target_language_region,
+            )
+            assert expected_voices == results
+
+    @pytest.mark.parametrize(
+        "target_language_region, expected_voices",
+        [
+            ("IN", {1: "Voice3", 2: "Voice3"}),
+            ("", {1: "Voice1", 2: "Voice3"}),
+        ],
+    )
+    def test_assign_voices_single_two_males_single_voice(
+        self, target_language_region, expected_voices
+    ):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = [
+            {
+                "speaker_id": 1,
+                "gender": "Male",
+            },
+            {
+                "speaker_id": 2,
+                "gender": "Male",
+            },
+        ]
+
+        voices = [
+            Voice(name="Voice1", gender="Male", region="US"),
+            Voice(name="Voice2", gender="Female", region="US"),
+            Voice(name="Voice3", gender="Male", region="IN"),
+            Voice(name="Voice4", gender="Female", region="IN"),
+        ]
+
+        tts = TextToSpeechUT()
+
+        with patch.object(tts, "get_available_voices", return_value=voices):
+            results = tts.assign_voices(
+                utterance_metadata=utterance_metadata,
+                target_language="",
+                target_language_region=target_language_region,
+            )
+            assert expected_voices == results
+
+    @pytest.mark.parametrize(
+        "target_language_region, expected_voices",
+        [
+            ("IN", {1: "Voice3", 2: "Voice5"}),
+            ("", {1: "Voice1", 2: "Voice3"}),
+        ],
+    )
+    def test_assign_voices_single_two_males_two_voices(
+        self, target_language_region, expected_voices
+    ):
+        tts = TextToSpeechUT()
+
+        utterance_metadata = [
+            {
+                "speaker_id": 1,
+                "gender": "Male",
+            },
+            {
+                "speaker_id": 2,
+                "gender": "Male",
+            },
+        ]
+
+        voices = [
+            Voice(name="Voice1", gender="Male", region="US"),
+            Voice(name="Voice2", gender="Female", region="UK"),
+            Voice(name="Voice3", gender="Male", region="IN"),
+            Voice(name="Voice4", gender="Female", region="IN"),
+            Voice(name="Voice5", gender="Male", region="IN"),
+        ]
+
+        tts = TextToSpeechUT()
+
+        with patch.object(tts, "get_available_voices", return_value=voices):
+            results = tts.assign_voices(
+                utterance_metadata=utterance_metadata,
+                target_language="",
+                target_language_region=target_language_region,
+            )
+            assert expected_voices == results
 
     def _get_update_utterance_metadata(self):
         return [

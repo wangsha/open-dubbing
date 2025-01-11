@@ -42,18 +42,17 @@ class TextToSpeech(ABC):
     def get_available_voices(self, language_code: str) -> List[Voice]:
         pass
 
-    def get_voices_with_region_preference(
+    def get_voices_for_region_only(
         self, *, voices: List[Voice], target_language_region: str
     ) -> List[Voice]:
         if len(target_language_region) == 0:
             return voices
 
-        voices_copy = voices[:]
+        voices_copy = []
 
         for voice in voices:
             if voice.region.endswith(target_language_region):
-                voices_copy.remove(voice)
-                voices_copy.insert(0, voice)
+                voices_copy.append(voice)
 
         return voices_copy
 
@@ -66,21 +65,39 @@ class TextToSpeech(ABC):
     ) -> Mapping[str, str | None]:
 
         voices = self.get_available_voices(target_language)
-        voices = self.get_voices_with_region_preference(
+        region_voices = self.get_voices_for_region_only(
             voices=voices, target_language_region=target_language_region
         )
 
         voice_assignment = {}
+        used_voices = set()
         for chunk in utterance_metadata:
             speaker_id = chunk["speaker_id"]
             if speaker_id in voice_assignment:
                 continue
 
             gender = chunk["gender"]
-            for voice in voices:
-                if voice.gender.lower() == gender.lower():
+            for voice in region_voices:  # Try to use an unused voice of the same gender
+                if (
+                    voice.name not in used_voices
+                    and voice.gender.lower() == gender.lower()
+                ):
                     voice_assignment[speaker_id] = voice.name
+                    used_voices.add(voice.name)
                     break
+            else:
+                for (
+                    voice
+                ) in region_voices:  # Try to use an already used voice of same gender
+                    if voice.gender.lower() == gender.lower():
+                        voice_assignment[speaker_id] = voice.name
+                        used_voices.add(voice.name)
+                        break
+                else:  # Try to use any other voice of any gender even if it used
+                    for voice in region_voices:
+                        voice_assignment[speaker_id] = voice.name
+                        used_voices.add(voice.name)
+                        break
 
         logger().info(f"text_to_speech.assign_voices. Returns: {voice_assignment}")
         return voice_assignment

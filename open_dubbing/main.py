@@ -67,7 +67,9 @@ def log_error_and_exit(msg: str, code: ExitCode):
     exit(code)
 
 
-def check_languages(source_language, target_language, _tts, translation, _stt):
+def check_languages(
+    source_language, target_language, _tts, translation, _stt, target_language_region
+):
     spt = _stt.get_languages()
     translation_languages = translation.get_language_pairs()
     logger().debug(f"check_languages. Pairs {len(translation_languages)}")
@@ -75,7 +77,7 @@ def check_languages(source_language, target_language, _tts, translation, _stt):
     tts = _tts.get_languages()
 
     if source_language not in spt:
-        msg = f"source language '{source_language}' is not supported by the speech recognition system. Supported languages: '{spt}"
+        msg = f"source language '{source_language}' is not supported by the speech recognition system. Supported languages: '{spt}'"
         log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_SPT)
 
     pair = (source_language, target_language)
@@ -84,7 +86,15 @@ def check_languages(source_language, target_language, _tts, translation, _stt):
         log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TRANS)
 
     if target_language not in tts:
-        msg = f"target language '{target_language}' is not supported by the text to speech system. Supported languages: '{tts}"
+        msg = f"target language '{target_language}' is not supported by the text to speech system. Supported languages: '{tts}'"
+        log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TTS)
+
+    voices = _tts.get_available_voices(language_code=target_language)
+    region_voices = _tts.get_voices_for_region_only(
+        voices=voices, target_language_region=target_language_region
+    )
+    if len(region_voices) == 0:
+        msg = f"filtering by '{target_language_region}' returns no voices for language '{target_language}' in the text to speech system"
         log_error_and_exit(msg, ExitCode.INVALID_LANGUAGE_TTS)
 
 
@@ -275,7 +285,14 @@ def main():
         args.translator, args.nllb_model, args.apertium_server, args.device
     )
 
-    check_languages(source_language, args.target_language, tts, translation, stt)
+    check_languages(
+        source_language,
+        args.target_language,
+        tts,
+        translation,
+        stt,
+        args.target_language_region,
+    )
 
     if not os.path.exists(args.output_directory):
         os.makedirs(args.output_directory)
