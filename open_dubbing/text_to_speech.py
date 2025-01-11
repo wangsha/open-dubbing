@@ -38,7 +38,7 @@ class TextToSpeech(ABC):
         self._SSML_FEMALE: Final[str] = "Female"
         self._DEFAULT_SPEED: Final[float] = 1.0
 
-    def unload_model():
+    def unload_model(self):
         pass
 
     @abstractmethod
