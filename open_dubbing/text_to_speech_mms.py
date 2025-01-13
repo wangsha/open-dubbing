@@ -55,18 +55,29 @@ class TextToSpeechMMS(TextToSpeech):
         )
         inputs = tokenizer(text, return_tensors="pt").to(self.device)
 
-        # Generate waveform
-        with torch.no_grad():
-            output = model(**inputs).waveform
+        # Model returns for some sequences of tokens no result
+        if inputs["input_ids"].shape[1] == 0:
+            sampling_rate = 16000
+            duration_seconds = 1
+            # If we fill the array with (np.zeros) the ffmpeg process later fails
+            output_np = np.ones(sampling_rate * duration_seconds, dtype=np.int16)
+            logger().warning(
+                f"TextToSpeechMMS._convert_text_to_speech. Model returns input tokens for text '{text}', generating an empty WAV file."
+            )
+        else:
+            with torch.no_grad():
+                output = model(**inputs).waveform
 
-        # Convert waveform to NumPy array and scale to 16-bit PCM
-        # Assuming `output` is a 2D tensor with shape (batch_size, samples)
-        output_np = output.squeeze().cpu().numpy()  # Remove batch dimension if present
-        output_np = np.clip(output_np, -1, 1)  # Clip values to be between -1 and 1
-        output_np = (output_np * 32767).astype(np.int16)  # Scale to 16-bit PCM
+            # Convert waveform to NumPy array and scale to 16-bit PCM
+            # Assuming `output` is a 2D tensor with shape (batch_size, samples)
+            output_np = (
+                output.squeeze().cpu().numpy()
+            )  # Remove batch dimension if present
+            output_np = np.clip(output_np, -1, 1)  # Clip values to be between -1 and 1
+            output_np = (output_np * 32767).astype(np.int16)  # Scale to 16-bit PCM
 
-        # Get the sampling rate
-        sampling_rate = model.config.sampling_rate
+            # Get the sampling rate
+            sampling_rate = model.config.sampling_rate
 
         # Write to WAV file
         wav_file = output_filename.replace(".mp3", ".wav")
