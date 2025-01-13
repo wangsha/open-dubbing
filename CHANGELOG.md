@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - MMS TTS: handle the case when the model returns no synthetized voice
-- Serveral voice assigment fixes (including using voices from the same gender if available)
+- Several voice assignment fixes (including using voices from the same gender if available)
 - Retry mechanism TTS API call if there is an error
 
 ## [0.1.8]
@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Support for OpenAI TTS
 ### Fixed
-- When updating an existing dubbing, use all the utterances to allow to calculate again propery speed changes.
+- When updating an existing dubbing, use all the utterances to allow to calculate again properly speed changes.
 - Normalize audio background only when it is necessary to avoid when possible residual vocals
 
 ## [0.1.7]
@@ -29,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [0.1.6]
 
 ### Added
-- Update to moviepy 2.1.1. Fixes serval issues like rotations
+- Update to moviepy 2.1.1. Fixes several issues like rotations
 ### Fixed
 - Small bugs in subtitles exportation
 
