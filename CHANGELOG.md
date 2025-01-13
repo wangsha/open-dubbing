@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.9]
+
+### Fixed
+- MMS TTS: handle the case when the model returns no synthetized voice
+- Serveral voice assigment fixes (including using voices from the same gender if available)
+- Retry mechanism TTS API call if there is an error
+
 ## [0.1.8]
 
 ### Added
