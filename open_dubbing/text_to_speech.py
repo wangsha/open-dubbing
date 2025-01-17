@@ -18,10 +18,9 @@ import os
 from abc import ABC, abstractmethod
 from typing import Final, List, Mapping, NamedTuple, Sequence
 
-from pydub import AudioSegment
-
 from open_dubbing import logger
 from open_dubbing.ffmpeg import FFmpeg
+from open_dubbing.pydub_audio_segment import AudioSegment
 from open_dubbing.utterance import Utterance
 
 

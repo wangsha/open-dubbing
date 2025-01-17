@@ -19,7 +19,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from pydub import AudioSegment
 from transformers import Wav2Vec2Processor
 from transformers.models.wav2vec2.modeling_wav2vec2 import (
     Wav2Vec2Model,
@@ -27,6 +26,7 @@ from transformers.models.wav2vec2.modeling_wav2vec2 import (
 )
 
 from open_dubbing import logger
+from open_dubbing.pydub_audio_segment import AudioSegment
 
 
 class ModelHead(nn.Module):

@@ -23,9 +23,9 @@ import torch
 
 from moviepy import AudioFileClip
 from pyannote.audio import Pipeline
-from pydub import AudioSegment
 
 from open_dubbing import logger
+from open_dubbing.pydub_audio_segment import AudioSegment
 
 _DEFAULT_DUBBED_VOCALS_AUDIO_FILE: Final[str] = "dubbed_vocals.mp3"
 _DEFAULT_DUBBED_AUDIO_FILE: Final[str] = "dubbed_audio"

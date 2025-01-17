@@ -17,10 +17,10 @@ import array
 import numpy as np
 import torch
 
-from pydub import AudioSegment
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
 from open_dubbing import logger
+from open_dubbing.pydub_audio_segment import AudioSegment
 from open_dubbing.speech_to_text import SpeechToText
 
 

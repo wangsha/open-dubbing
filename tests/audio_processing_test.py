@@ -24,9 +24,9 @@ import pytest
 
 from moviepy.audio.AudioClip import AudioArrayClip
 from pyannote.audio import Pipeline
-from pydub import AudioSegment
 
 from open_dubbing import audio_processing
+from open_dubbing.pydub_audio_segment import AudioSegment
 
 
 class TestAudioProcessing:

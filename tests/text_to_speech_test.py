@@ -21,8 +21,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pydub import AudioSegment
-
+from open_dubbing.pydub_audio_segment import AudioSegment
 from open_dubbing.text_to_speech import TextToSpeech, Voice
 
 

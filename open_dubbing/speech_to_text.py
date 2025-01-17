@@ -20,9 +20,9 @@ from abc import ABC, abstractmethod
 from typing import Mapping, Sequence
 
 from iso639 import Lang
-from pydub import AudioSegment
 
 from open_dubbing import logger
+from open_dubbing.pydub_audio_segment import AudioSegment
 from open_dubbing.voice_gender_classifier import VoiceGenderClassifier
 
 
