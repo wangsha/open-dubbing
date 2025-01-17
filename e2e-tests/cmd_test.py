@@ -43,7 +43,7 @@ class TestCmd:
             return utterances
 
     def _assert_dubbing_action(self, directory):
-        operating = platform.system().lower()
+        # operating = platform.system().lower()
         utterances = self._get_utterances(directory)
         text_array = [entry["translated_text"] for entry in utterances]
 
@@ -56,81 +56,46 @@ class TestCmd:
         ends = [entry["end"] for entry in utterances]
         speeds = [entry["speed"] for entry in utterances]
 
-        if operating == "darwin":
-            assert 4 == len(utterances)
+        print(f"starts: {starts}")
 
-            assert np.allclose(
-                [
-                    1.26284375,
-                    2.44409375,
-                    5.24534375,
-                    7.607843750000001,
-                ],
-                starts,
-                atol=0.5,
-            ), "Utterance start check failed"
+        assert np.allclose(
+            [
+                1.26284375,
+                5.24534375,
+                7.607843750000001,
+            ],
+            starts,
+            atol=0.5,
+        ), "Utterance start check failed"
 
-            assert np.allclose(
-                [
-                    2.17409375,
-                    3.94596875,
-                    6.61221875,
-                    8.687843750000003,
-                ],
-                ends,
-                atol=0.5,
-            ), "Utterance end check failed"
+        print(f"ends: {ends}")
+        assert np.allclose(
+            [
+                3.94596875,
+                6.629093750000001,
+                8.687843750000003,
+            ],
+            ends,
+            atol=0.5,
+        ), "Utterance end check failed"
 
-            assert "- Bon dia. - Bé." == text_array[0], "translated text 0"
-            assert "Em dic Jordi Mas." == text_array[1], "translated text 1"
-            assert "Sóc de Barcelona." == text_array[2], "translated text 2"
-            assert "I m'encanta aquesta ciutat." == text_array[3], "translated text 3"
+        print(f"speeds: {speeds}")
+        assert np.allclose(
+            [1.0, 1.0, 1.3], speeds, atol=2
+        ), "Utterance speed check failed"
 
-        else:
-            assert 3 == len(utterances)
-
-            assert np.allclose(
-                [
-                    1.26284375,
-                    5.24534375,
-                    7.607843750000001,
-                ],
-                starts,
-                atol=0.5,
-            ), "Utterance start check failed"
-
-            assert np.allclose(
-                [
-                    3.94596875,
-                    6.629093750000001,
-                    8.687843750000003,
-                ],
-                ends,
-                atol=0.5,
-            ), "Utterance end check failed"
-
-            assert np.allclose(
-                [1.0, 1.0, 1.3], speeds, atol=2
-            ), "Utterance speed check failed"
-
-            assert "Bon dia, em dic Jordi Mas." == text_array[0], "translated text 0"
-            assert "Sóc de Barcelona." == text_array[1], "translated text 1"
-            assert "I m'encanta aquesta ciutat." == text_array[2], "translated text 2"
+        assert "Bon dia, em dic Jordi Mas." == text_array[0], "translated text 0"
+        assert "Sóc de Barcelona." == text_array[1], "translated text 1"
+        assert "I m'encanta aquesta ciutat." == text_array[2], "translated text 2"
 
     def _assert_update_action(self, directory):
         operating = platform.system().lower()
         utterances = self._get_utterances(directory)
         text_array = [entry["translated_text"] for entry in utterances]
 
-        if operating == "darwin":
-            assert (
-                "I m'encanta aquesta ciutat tant meva." == text_array[3]
-            ), "updated translated text 2"
-
-        else:
-            assert (
-                "I m'encanta aquesta ciutat tant meva." == text_array[2]
-            ), "updated translated text 2"
+        assert (
+            "I m'encanta aquesta ciutat tant meva." == text_array[2]
+        ), "updated translated text 2"
 
     @pytest.mark.parametrize("tts_engine", ["edge", "mms"])
     def test_translations_with_tts(self, tts_engine):
