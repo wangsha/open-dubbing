@@ -1,6 +1,5 @@
 import json
 import os
-import platform
 import tempfile
 
 import numpy as np
@@ -13,7 +12,6 @@ class TestCmd:
 
     # TODO:
     #   - To check transcription out of the final video
-    #   - Check speed in macOS
     def _get_transcription(self, filename):
         model = WhisperModel("medium")
         segments, info = model.transcribe(filename, language="ca", temperature=[0])
@@ -43,7 +41,6 @@ class TestCmd:
             return utterances
 
     def _assert_dubbing_action(self, directory):
-        # operating = platform.system().lower()
         utterances = self._get_utterances(directory)
         text_array = [entry["translated_text"] for entry in utterances]
 
@@ -56,8 +53,6 @@ class TestCmd:
         ends = [entry["end"] for entry in utterances]
         speeds = [entry["speed"] for entry in utterances]
 
-        print(f"starts: {starts}")
-
         assert np.allclose(
             [
                 1.26284375,
@@ -68,7 +63,6 @@ class TestCmd:
             atol=0.5,
         ), "Utterance start check failed"
 
-        print(f"ends: {ends}")
         assert np.allclose(
             [
                 3.94596875,
@@ -79,7 +73,6 @@ class TestCmd:
             atol=0.5,
         ), "Utterance end check failed"
 
-        print(f"speeds: {speeds}")
         assert np.allclose(
             [1.0, 1.0, 1.3], speeds, atol=2
         ), "Utterance speed check failed"
@@ -89,7 +82,6 @@ class TestCmd:
         assert "I m'encanta aquesta ciutat." == text_array[2], "translated text 2"
 
     def _assert_update_action(self, directory):
-        operating = platform.system().lower()
         utterances = self._get_utterances(directory)
         text_array = [entry["translated_text"] for entry in utterances]
 
