@@ -185,48 +185,101 @@ class Utterance:
 
         return new_utterance
 
+    def _get_highest_id(self, utterance_metadata):
+        highest_id = 1
+        for utterance in utterance_metadata:
+            id = utterance["id"]
+            if id > highest_id:
+                highest_id = id
+        return highest_id
+
+    def _create_new_utterance(self, update, new_id):
+        mandatory_fields = [
+            "speaker_id",
+            "translated_text",
+            "assigned_voice",
+            "gender",
+            "start",
+            "end",
+        ]
+
+        new_utterance = {"id": new_id}
+
+        for field in mandatory_fields:
+            value = update.get(field, None)
+            if not value:
+                logger().warning(
+                    f"Missing field '{field}' when adding new utterance with id '{new_id}'"
+                )
+                return None
+
+            new_utterance[field] = value
+
+        return new_utterance
+
+    def _update_utterance(self, update, utterance):
+        updateable_fields = [
+            "speaker_id",
+            "translated_text",
+            "speed",
+            "assigned_voice",
+            "for_dubbing",
+            "gender",
+            "start",
+            "end",
+        ]
+        for field in updateable_fields:
+            value = update.get(field, None)
+            if not value:
+                continue
+
+            utterance[field] = value
+        return utterance
+
     def update_utterances(self, utterance_master, utterance_update):
-        id_to_update = {}
+        id_to_update_or_delete = {}
+        id_to_create = {}
         utterance_new = []
 
         for utterance in utterance_update:
             id = utterance["id"]
-            id_to_update[id] = utterance
+            operation = utterance["operation"]
+            if operation == "create":
+                if id == 0:
+                    new_id = self._get_highest_id(utterance_master) + 1
+                    new_utterance = self._create_new_utterance(utterance, new_id)
+                    if new_utterance:
+                        utterance_new.append(new_utterance)
+                else:
+                    id_to_create[id] = utterance
+            else:
+                id_to_update_or_delete[id] = utterance
 
         for utterance in utterance_master:
             id = utterance["id"]
-            update = id_to_update.get(id, None)
+
+            update = id_to_update_or_delete.get(id, None)
             if not update:
                 utterance_new.append(utterance)
-                continue
+            else:
+                operation = update.get("operation", None)
+                if not operation:
+                    raise ValueError("No operation field defined")
 
-            operation = update.get("operation", None)
-            if not operation:
-                raise ValueError("No operation field defined")
-
-            if operation == "delete":
-                continue
-
-            if operation != "update":
-                raise ValueError(f"Invalid operation {operation}")
-
-            updateable_fields = [
-                "speaker_id",
-                "translated_text",
-                "speed",
-                "assigned_voice",
-                "for_dubbing",
-                "gender",
-                "start",
-                "end",
-            ]
-            for field in updateable_fields:
-                value = update.get(field, None)
-                if not value:
+                if operation == "delete":
                     continue
 
-                utterance[field] = value
+                if operation != "update":
+                    raise ValueError(f"Invalid operation {operation}")
 
-            utterance_new.append(utterance)
+                utterance = self._update_utterance(update, utterance)
+                utterance_new.append(utterance)
+
+            create = id_to_create.get(id, None)
+            if create:
+                new_id = self._get_highest_id(utterance_master) + 1
+                new_utterance = self._create_new_utterance(create, new_id)
+                if new_utterance:
+                    utterance_new.append(new_utterance)
 
         return utterance_new

@@ -23,7 +23,6 @@ from open_dubbing.utterance import Utterance
 class TestUterrance:
 
     def testrun_save_utterance(self):
-
         with tempfile.TemporaryDirectory() as temp_dir:
             directory = temp_dir
 
@@ -65,7 +64,6 @@ class TestUterrance:
                 }
 
     def test_hash_utterances(self):
-
         utterances = [
             {
                 "start": 1.26,
@@ -145,7 +143,6 @@ class TestUterrance:
         assert "Hola" == modified[0]["text"]
 
     def test_add_unique_ids(self):
-
         utterances = [
             {
                 "start": 1.26,
@@ -201,8 +198,73 @@ class TestUterrance:
             },
         ]
 
-    def test_update_utterances_operation_delete(self):
+    def test_update_utterances_operation_create(self):
+        master = self._get_master_utterances()
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+        create_utterances = [
+            {
+                "id": 1,
+                "operation": "create",
+                "translated_text": "Bon dia",
+                "speaker_id": "SPEAKER_01",
+                "gender": "Male",
+                "assigned_voice": "ca-ES-EnricNeural",
+                "start": 4,
+                "end": 5,
+            }
+        ]
+        new_utterances = utterance.update_utterances(master, create_utterances)
+        assert len(new_utterances) == 3
+        assert [u["id"] for u in new_utterances] == [1, 3, 2]
+        assert new_utterances[1]["translated_text"] == "Bon dia"
 
+    def test_update_utterances_operation_create_first(self):
+        master = self._get_master_utterances()
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+        create_utterances = [
+            {
+                "id": 0,
+                "operation": "create",
+                "translated_text": "Bon dia",
+                "speaker_id": "SPEAKER_01",
+                "gender": "Male",
+                "assigned_voice": "ca-ES-EnricNeural",
+                "start": 4,
+                "end": 5,
+            }
+        ]
+        new_utterances = utterance.update_utterances(master, create_utterances)
+        assert len(new_utterances) == 3
+        assert [u["id"] for u in new_utterances] == [3, 1, 2]
+        assert new_utterances[0]["translated_text"] == "Bon dia"
+
+    def test_update_utterances_operation_create_ignore_missing_fields(self):
+        master = self._get_master_utterances()
+        utterance = Utterance(
+            target_language="cat",
+            output_directory=None,
+        )
+        create_utterances = [
+            {
+                "id": 0,
+                "operation": "create",
+                "gender": "Male",
+                "assigned_voice": "ca-ES-EnricNeural",
+                "start": 4,
+                "end": 5,
+            }
+        ]
+        new_utterances = utterance.update_utterances(master, create_utterances)
+        assert len(new_utterances) == 2
+        assert [u["id"] for u in new_utterances] == [1, 2]
+
+    def test_update_utterances_operation_delete(self):
         master = self._get_master_utterances()
         utterance = Utterance(
             target_language="cat",
