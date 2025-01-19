@@ -18,26 +18,27 @@ from open_dubbing.speech_to_text_faster_whisper import SpeechToTextFasterWhisper
 
 
 class TestTextToSpeechFasterWhisper:
+    @classmethod
+    def setup_class(cls):
+        """Set up the class by loading the model once."""
+        cls.stt = SpeechToTextFasterWhisper()
+        cls.stt.load_model()
 
     def test_transcribe(self):
         data_dir = os.path.dirname(os.path.realpath(__file__))
         filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
-        stt = SpeechToTextFasterWhisper()
-        stt.load_model()
-        text = stt._transcribe(vocals_filepath=filename, source_language_iso_639_1="en")
+        text = self.stt._transcribe(
+            vocals_filepath=filename, source_language_iso_639_1="en"
+        )
         assert text.strip() == "This is a test."
 
     def test_detect_language(self):
         data_dir = os.path.dirname(os.path.realpath(__file__))
         filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
-        stt = SpeechToTextFasterWhisper()
-        stt.load_model()
-        language = stt.detect_language(filename)
+        language = self.stt.detect_language(filename)
         assert language == "ell"
 
     def test_get_languages(self):
-        stt = SpeechToTextFasterWhisper()
-        stt.load_model()
-        languages = stt.get_languages()
+        languages = self.stt.get_languages()
         assert len(languages) == 100
         assert "eng" in languages

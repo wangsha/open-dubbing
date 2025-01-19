@@ -235,7 +235,7 @@ class TextToSpeech(ABC):
         start: float,
         end: float,
         audio_file: str,
-    ) -> int:
+    ) -> float:
         result = None
         for utterance in utterance_metadata:
             u_start = utterance["start"]

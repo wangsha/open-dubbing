@@ -18,12 +18,14 @@ import numpy as np
 import pytest
 import torch
 
-from open_dubbing.voice_gender_classifier import (  # Assuming this is the file name
-    VoiceGenderClassifier,
-)
+from open_dubbing.voice_gender_classifier import VoiceGenderClassifier
 
 
 class TestVoiceGenderClassifier:
+    @classmethod
+    def setup_class(cls):
+        """Set up the VoiceGenderClassifier model once for all tests."""
+        cls.classifier = VoiceGenderClassifier()
 
     @pytest.mark.parametrize(
         "logits_gender, expected_gender",
@@ -33,17 +35,14 @@ class TestVoiceGenderClassifier:
         ],
     )
     def test_interpret_gender(self, logits_gender, expected_gender):
-        classifier = VoiceGenderClassifier()
-        predicted_gender = classifier._interpret_gender(logits_gender)
-
+        predicted_gender = self.classifier._interpret_gender(logits_gender)
         assert predicted_gender == expected_gender
 
     def test_load_audio_file(self):
         data_dir = os.path.dirname(os.path.realpath(__file__))
         filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
 
-        classifier = VoiceGenderClassifier()
-        samples, target_sampling_rate = classifier.load_audio_file(filename)
+        samples, target_sampling_rate = self.classifier.load_audio_file(filename)
         sample_sum = np.sum(samples)
         assert 16000 == target_sampling_rate
         assert np.isclose(sample_sum, -19.797165, atol=2)
@@ -52,6 +51,5 @@ class TestVoiceGenderClassifier:
         data_dir = os.path.dirname(os.path.realpath(__file__))
         filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
 
-        classifier = VoiceGenderClassifier()
-        gender = classifier.get_gender_for_file(filename)
+        gender = self.classifier.get_gender_for_file(filename)
         assert "Male" == gender

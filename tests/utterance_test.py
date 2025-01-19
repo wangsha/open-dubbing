@@ -20,7 +20,7 @@ from open_dubbing.preprocessing import PreprocessingArtifacts
 from open_dubbing.utterance import Utterance
 
 
-class TestUterrance:
+class TestUtterance:
 
     def testrun_save_utterance(self):
         with tempfile.TemporaryDirectory() as temp_dir:

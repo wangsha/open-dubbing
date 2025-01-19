@@ -21,26 +21,26 @@ from open_dubbing.speech_to_text_whisper_transformers import (
 
 class TestSpeechToTextWhisperTransformers:
 
+    @classmethod
+    def setup_class(cls):
+        cls.data_dir = os.path.dirname(os.path.realpath(__file__))
+        cls.stt = SpeechToTextWhisperTransformers()
+        cls.stt.load_model()
+
     def test_transcribe(self):
-        data_dir = os.path.dirname(os.path.realpath(__file__))
-        filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
-        stt = SpeechToTextWhisperTransformers()
-        stt.load_model()
-        text = stt._transcribe(vocals_filepath=filename, source_language_iso_639_1="en")
+        filename = os.path.join(self.data_dir, "data/this_is_a_test.mp3")
+        text = self.stt._transcribe(
+            vocals_filepath=filename, source_language_iso_639_1="en"
+        )
         assert text.strip() == "This is a test."
 
     def test_detect_language(self):
-        data_dir = os.path.dirname(os.path.realpath(__file__))
-        filename = os.path.join(data_dir, "data/this_is_a_test.mp3")
-        stt = SpeechToTextWhisperTransformers()
-        stt.load_model()
-        language = stt.detect_language(filename)
+        filename = os.path.join(self.data_dir, "data/this_is_a_test.mp3")
+        language = self.stt.detect_language(filename)
         # Returns 'ell' instead of 'eng'. We check the size only
         assert len(language) == 3
 
     def test_get_languages(self):
-        stt = SpeechToTextWhisperTransformers()
-        stt.load_model()
-        languages = stt.get_languages()
+        languages = self.stt.get_languages()
         assert len(languages) == 100
         assert "eng" in languages

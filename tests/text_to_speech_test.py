@@ -233,11 +233,9 @@ class TestTextToSpeech:
         # Mock dependencies
         utterance_metadata = self._get_dub_metadata()
         utterance_metadata[1]["speed"] = "1.2"
-        print(f"utterance_metadata: {utterance_metadata}")
 
         update_metadata = self._get_dub_metadata()
         del update_metadata[0]
-        print(f"update_metadata: {update_metadata}")
 
         output_directory = "/output"
         target_language = "eng"
