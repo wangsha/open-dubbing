@@ -130,7 +130,11 @@ class Translation(ABC):
         stripped_translation = re.sub(
             rf"^\s*{_BREAK_MARKER}\s*|\s*{_BREAK_MARKER}\s*$", "", translated_script
         )
-        text_segments = stripped_translation.split(_BREAK_MARKER)
+        if stripped_translation:
+            text_segments = stripped_translation.split(_BREAK_MARKER)
+        else:
+            text_segments = []
+
         if len(utterance_metadata) != len(text_segments):
             raise ValueError(
                 "The utterance metadata must be of the same length as the text"

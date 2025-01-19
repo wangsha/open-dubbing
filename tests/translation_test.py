@@ -139,6 +139,11 @@ class TestTranslation:
                     },
                 ],
             ),
+            (
+                [],
+                "",
+                [],
+            ),
         ],
     )
     def test_add_translations(
