@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.0]
+
+### Fixed
+- Removed pydub dependency (which is an abandoned project) and integrate necessary code
+- Fix the case when there is no voice in the video (nothing to dub)
+
 ## [0.1.9]
 
 ### Fixed
