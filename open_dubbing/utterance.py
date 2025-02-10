@@ -44,7 +44,7 @@ class Utterance:
     def load_utterances(self) -> tuple[Any, PreprocessingArtifacts, Any]:
         utterance_metadata_file = self._get_file_name()
 
-        with open(utterance_metadata_file, "r") as file:
+        with open(utterance_metadata_file, "r", encoding="utf-8") as file:
             data = json.load(file)
             utterances = data["utterances"]
             preprocessing_output = PreprocessingArtifacts(

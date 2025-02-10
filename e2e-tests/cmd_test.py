@@ -1,4 +1,3 @@
-import json
 import os
 import tempfile
 
@@ -6,6 +5,8 @@ import numpy as np
 import pytest
 
 from faster_whisper import WhisperModel
+
+from open_dubbing.utterance import Utterance
 
 
 class TestCmd:
@@ -34,11 +35,9 @@ class TestCmd:
             file.write(text)
 
     def _get_utterances(self, directory):
-        metadata_file = os.path.join(directory, "utterance_metadata_cat.json")
-        with open(metadata_file, encoding="utf-8") as json_data:
-            data = json.load(json_data)
-            utterances = data["utterances"]
-            return utterances
+        utterance = Utterance(target_language="cat", output_directory=directory)
+        utterances, _, _ = utterance.load_utterances()
+        return utterances
 
     def _assert_dubbing_action(self, directory):
         utterances = self._get_utterances(directory)
