@@ -111,9 +111,10 @@ jobs:
         coverage xml
 
     - name: Upload coverage report
-      uses: actions/upload-artifact@v3
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12' && matrix.extra_lib == 'none'
+      uses: actions/upload-artifact@v4
       with:
-        name: coverage-report
+        name: coverage-report-${{ github.sha }}
         path: coverage.xml
 
     - name: Report test coverage
