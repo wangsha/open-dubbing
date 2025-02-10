@@ -23,14 +23,14 @@ class TestCmd:
     def _update_translation(self, directory):
         metadata_file = os.path.join(directory, "utterance_metadata_cat.json")
 
-        with open(metadata_file, "r") as file:
+        with open(metadata_file, "r", encoding="utf-8") as file:
             text = file.read()
 
         text = text.replace(
             "I m'encanta aquesta ciutat.", "I m'encanta aquesta ciutat tant meva."
         )
 
-        with open(metadata_file, "w") as file:
+        with open(metadata_file, "w", encoding="utf-8") as file:
             file.write(text)
 
     def _get_utterances(self, directory):
