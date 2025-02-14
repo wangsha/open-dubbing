@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
          os: [ubuntu-latest, macos-latest, windows-latest]
-         python-version: [3.10.15, 3.11, 3.12]
+         python-version: [3.10.15, 3.11, 3.12, 3.13]
          extra_lib: [none, coqui_yes, openai_yes] # Coqui pools different versions of transformers
          exclude:
           - os: macos-latest
