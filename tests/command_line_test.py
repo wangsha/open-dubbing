@@ -21,7 +21,7 @@ from open_dubbing.command_line import CommandLine
 
 class TestCommandLine:
 
-    def test_test_input_file(self):
+    def test_input_file(self):
         with patch(
             "sys.argv",
             [
