@@ -27,6 +27,7 @@ from open_dubbing.dubbing import Dubber
 from open_dubbing.exit_code import ExitCode
 from open_dubbing.ffmpeg import FFmpeg
 from open_dubbing.speech_to_text_faster_whisper import SpeechToTextFasterWhisper
+from open_dubbing.speech_to_text_openai_whisper import SpeechToTextOpenAIWhisperTransformers
 from open_dubbing.speech_to_text_whisper_transformers import (
     SpeechToTextWhisperTransformers,
 )
@@ -264,6 +265,23 @@ def main():
         )
         if args.vad:
             stt_text += " (with vad filter)"
+    elif stt_type == "openai-whisper":
+        try:
+            key = _get_openai_key(key=args.openai_api_key)
+            stt = SpeechToTextOpenAIWhisperTransformers(
+                model_name=args.whisper_model,
+                device=args.device,
+                cpu_threads=args.cpu_threads,
+                api_key=key,
+            )
+        except Exception:
+            msg = "Make sure that OpenAI library is installed by running 'pip install open-dubbing[openai]'"
+            log_error_and_exit(msg, ExitCode.NO_OPENAI_TTS)
+
+        if args.vad:
+            logger().warning(
+                "Vad filter is not supported with OpenAI Whisper API"
+            )
     else:
         stt = SpeechToTextWhisperTransformers(
             model_name=args.whisper_model,

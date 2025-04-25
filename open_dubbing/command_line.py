@@ -89,12 +89,13 @@ class CommandLine:
             "--stt",
             type=str,
             default="auto",
-            choices=["auto", "faster-whisper", "transformers"],
+            choices=["auto", "faster-whisper", "transformers", "openai-whisper"],
             help=(
                 "Speech to text. Choices are:\n"
                 "'auto': Autoselect best implementation.\n"
                 "'faster-whisper': Faster-whisper's OpenAI whisper implementation.\n"
                 "'transformers': Transformers OpenAI whisper implementation.\n"
+                "'openai-whisper': OpenAI Whisper API implementation.\n"
             ),
         )
         parser.add_argument(
