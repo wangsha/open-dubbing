@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
+import math
 import os
 import warnings
 
@@ -30,6 +29,46 @@ from open_dubbing.pydub_audio_segment import AudioSegment
 _DEFAULT_DUBBED_VOCALS_AUDIO_FILE: Final[str] = "dubbed_vocals.mp3"
 _DEFAULT_DUBBED_AUDIO_FILE: Final[str] = "dubbed_audio"
 _DEFAULT_OUTPUT_FORMAT: Final[str] = ".mp3"
+
+
+def split_audio_by_size(input_file, output_dir, target_size_mb):
+    # Load audio file
+    audio = AudioSegment.from_file(input_file)
+    prefix = "chunk"
+    # Estimate bitrate in bytes per second
+    # For MP3, common bitrates are 128 kbps, 192 kbps, etc.
+    # Adjust this value based on your specific file
+    bitrate_kbps = 128
+    bytes_per_second = (bitrate_kbps * 1000) // 8
+
+    # Calculate chunk duration in milliseconds
+    target_size_bytes = target_size_mb * 1024 * 1024
+    chunk_duration_ms = (target_size_bytes / bytes_per_second) * 1000
+
+    # Calculate number of chunks
+    total_duration_ms = len(audio)
+    num_chunks = math.ceil(total_duration_ms / chunk_duration_ms)
+
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+
+    timestamps = []
+
+    for i in range(num_chunks):
+        start_ms = int(i * chunk_duration_ms)
+        end_ms = int(min((i + 1) * chunk_duration_ms, total_duration_ms))
+        chunk = audio[start_ms:end_ms]
+        timestamps.append(
+            {"start": round(start_ms / 1000.0, 1), "end": round(end_ms / 1000.0, 1)}
+        )
+        chunk_filename = (
+            f"{prefix}_{timestamps[-1]['start']}_{timestamps[-1]['end']}.mp3"
+        )
+        chunk_path = os.path.join(output_dir, chunk_filename)
+        chunk.export(chunk_path, format="mp3")
+        print(f"Exported {chunk_path}")
+
+    return timestamps
 
 
 def create_pyannote_timestamps(

@@ -20,3 +20,9 @@ publish-release:
 
 run:
 	export PYTHONPATH="${PYTHONPATH}:."; pipenv run python open_dubbing/main.py --tts openai --stt openai-whisper --translator openai --dubbed_subtitles --original_subtitles   --input_file e2e-tests/french_audio/frenchaudio.mp3 --target_language=eng --output_directory e2e-tests/french_audio
+
+deploy-lab:
+	rsync -avzP -e "ssh -p 2224" -rt --delete --exclude '.venv' --exclude 'data'  --exclude '.*' --exclude '*.pyc'  --exclude '*.zip' . wangsha@kg.aws:open-dubbing
+
+download-lab:
+	rsync -avzP -e "ssh -p 2224" -rt --delete --exclude '.venv' --exclude 'data'  --exclude '.*' --exclude '*.pyc'  --exclude '*.zip' wangsha@kg.aws:open-dubbing/e2e-tests/french_audio ./e2e-tests/french_audio

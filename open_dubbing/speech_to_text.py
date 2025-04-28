@@ -127,7 +127,7 @@ class SpeechToText(ABC):
     def _get_unique_speakers_largest_audio(self, utterance_metadata):
         speakers = {}
         for chunk in utterance_metadata:
-            speaker = chunk["speaker_id"]
+            speaker = chunk.get("speaker_id")
             length = chunk["end"] - chunk["start"]
             dubbed_path = chunk["path"]
 
@@ -166,7 +166,7 @@ class SpeechToText(ABC):
 
         r = []
         for chunk in utterance_metadata:
-            speaker = chunk["speaker_id"]
+            speaker = chunk.get("speaker_id")
             gender = speaker_gender[speaker]
             _tuple = (speaker, gender)
             r.append(_tuple)

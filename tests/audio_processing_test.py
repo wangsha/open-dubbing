@@ -84,6 +84,11 @@ class TestAudioProcessing:
                     audio_file=temporary_file.name,
                     output_directory=output_directory,
                 )
+                chunks = audio_processing.split_audio_by_size(
+                    input_file=temporary_file.name,
+                    output_dir=output_directory,
+                    target_size_mb=20,
+                )
                 expected_file = os.path.join(output_directory, "chunk_0.0_5.0.mp3")
                 _ = {
                     "path": os.path.join(output_directory, "chunk_0.0_5.0.mp3"),

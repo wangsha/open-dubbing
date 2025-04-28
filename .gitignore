@@ -2,3 +2,4 @@
 /open_dubbing.egg-info
 *.pyc
 .env
+/e2e-tests

@@ -62,8 +62,9 @@ class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
                 file=audio_file,
                 language=source_language_iso_639_1,
                 response_format="verbose_json",
+                timestamp_granularities="segment",
             )
-
+        data = response.model_dump()
         transcription = response.text
 
         logger().debug(

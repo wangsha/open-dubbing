@@ -68,3 +68,76 @@
 2025-04-28 15:39:47,420 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
 2025-04-28 15:39:50,024 - INFO - Dubbing process starting...
 2025-04-28 15:39:50,024 - INFO - demucs_command = /Users/aloha/Projects/open-dubbing/.venv/bin/python -m demucs.separate -o "e2e-tests/french_audio" --device cpu --shifts 1 --overlap 0.25 -j 0 --two-stems vocals --mp3 --mp3-bitrate 320 --mp3-preset 2 "e2e-tests/french_audio/frenchaudio.mp3"
+2025-04-28 15:51:10,192 - INFO - Detected language 'fra'
+2025-04-28 15:51:10,204 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 15:51:12,670 - INFO - Dubbing process starting...
+2025-04-28 16:15:11,168 - INFO - Detected language 'fra'
+2025-04-28 16:15:11,179 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:15:13,288 - INFO - Dubbing process starting...
+2025-04-28 16:15:13,288 - INFO - Completed task 'Preprocessing completed': current_rss 867.53 MB, time 0.00s
+2025-04-28 16:15:13,288 - INFO - Speech to text...
+2025-04-28 16:17:39,148 - INFO - Detected language 'fra'
+2025-04-28 16:17:39,161 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:17:41,233 - INFO - Dubbing process starting...
+2025-04-28 16:17:41,233 - INFO - Completed task 'Preprocessing completed': current_rss 877.30 MB, time 0.00s
+2025-04-28 16:17:41,233 - INFO - Speech to text...
+2025-04-28 16:47:53,147 - INFO - Detected language 'zho'
+2025-04-28 16:47:53,157 - INFO - Processing 'e2e-tests/chinese_audio/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:47:55,282 - INFO - Dubbing process starting...
+2025-04-28 16:47:57,629 - INFO - run_cut_and_save_audio
+2025-04-28 16:47:59,875 - INFO - Completed task 'Preprocessing completed': current_rss 685.95 MB, time 4.59s
+2025-04-28 16:47:59,875 - INFO - Speech to text...
+2025-04-28 16:49:13,715 - INFO - Detected language 'zho'
+2025-04-28 16:49:13,731 - INFO - Processing 'e2e-tests/chinese_audio/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:49:15,919 - INFO - Dubbing process starting...
+2025-04-28 16:49:18,254 - INFO - run_cut_and_save_audio
+2025-04-28 16:49:20,500 - INFO - Completed task 'Preprocessing completed': current_rss 674.94 MB, time 4.58s
+2025-04-28 16:49:20,500 - INFO - Speech to text...
+2025-04-28 16:50:30,101 - INFO - Detected language 'zho'
+2025-04-28 16:50:30,110 - INFO - Processing 'e2e-tests/chinese_audio/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:50:32,150 - INFO - Dubbing process starting...
+2025-04-28 16:50:34,437 - INFO - run_cut_and_save_audio
+2025-04-28 16:50:36,683 - INFO - Completed task 'Preprocessing completed': current_rss 722.53 MB, time 4.53s
+2025-04-28 16:50:36,683 - INFO - Speech to text...
+2025-04-28 16:50:56,328 - INFO - Completed task 'Speech to text completed': current_rss 1861.08 MB, time 19.65s
+2025-04-28 16:51:08,257 - INFO - Completed task 'Translation completed': current_rss 1395.45 MB, time 11.93s
+2025-04-28 16:51:08,258 - INFO - text_to_speech.assign_voices. Returns: {None: 'alloy'}
+2025-04-28 16:51:49,438 - INFO - Completed task 'Text to speech completed': current_rss 1483.75 MB, time 41.18s
+2025-04-28 16:51:52,913 - INFO - merge_background_and_vocals. Normalizing background (max amplitude 0.70)
+2025-04-28 16:53:36,198 - INFO - Detected language 'zho'
+2025-04-28 16:53:36,208 - INFO - Processing 'e2e-tests/chinese_audio/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 16:53:38,848 - INFO - Dubbing process starting...
+2025-04-28 16:53:41,194 - INFO - run_cut_and_save_audio
+2025-04-28 16:53:43,443 - INFO - Completed task 'Preprocessing completed': current_rss 737.48 MB, time 4.60s
+2025-04-28 16:53:43,445 - INFO - Speech to text...
+2025-04-28 16:54:06,751 - INFO - Completed task 'Speech to text completed': current_rss 1813.50 MB, time 23.31s
+2025-04-28 16:54:24,181 - INFO - Completed task 'Translation completed': current_rss 1580.17 MB, time 17.43s
+2025-04-28 16:54:24,182 - INFO - text_to_speech.assign_voices. Returns: {None: 'alloy'}
+2025-04-28 16:54:49,578 - INFO - Completed task 'Text to speech completed': current_rss 1554.80 MB, time 25.40s
+2025-04-28 16:54:49,581 - INFO - Completed task 'Post processing completed': current_rss 1555.17 MB, time 0.00s
+2025-04-28 16:54:49,581 - INFO - Dubbing process finished.
+2025-04-28 16:54:49,581 - INFO - Total execution time: 70.73 secs
+2025-04-28 16:54:49,581 - INFO -  Task 'preprocessing' in 4.60 secs (6.50%)
+2025-04-28 16:54:49,581 - INFO -  Task 'stt' in 23.31 secs (32.95%)
+2025-04-28 16:54:49,581 - INFO -  Task 'translation' in 17.43 secs (24.64%)
+2025-04-28 16:54:49,581 - INFO -  Task 'tts' in 25.40 secs (35.90%)
+2025-04-28 16:54:49,581 - INFO -  Task 'postprocessing' in 0.00 secs (0.00%)
+2025-04-28 16:54:49,592 - INFO - Output files saved in: e2e-tests/chinese_audio.
+2025-04-28 17:17:09,692 - INFO - Detected language 'fra'
+2025-04-28 17:17:09,704 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 17:17:11,815 - INFO - Dubbing process starting...
+2025-04-28 17:17:47,332 - INFO - run_cut_and_save_audio
+2025-04-28 17:18:21,339 - INFO - Completed task 'Preprocessing completed': current_rss 282.61 MB, time 69.52s
+2025-04-28 17:18:21,339 - INFO - Speech to text...
+2025-04-28 17:22:13,779 - INFO - Completed task 'Speech to text completed': current_rss 1487.44 MB, time 232.44s
+2025-04-28 17:26:07,290 - INFO - Completed task 'Translation completed': current_rss 538.39 MB, time 233.51s
+2025-04-28 17:26:07,294 - INFO - text_to_speech.assign_voices. Returns: {None: 'alloy'}
+2025-04-28 17:27:39,452 - INFO - Detected language 'fra'
+2025-04-28 17:27:39,464 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 17:27:41,672 - INFO - Dubbing process starting...
+2025-04-28 17:28:43,752 - INFO - Detected language 'fra'
+2025-04-28 17:28:43,760 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 17:28:45,803 - INFO - Dubbing process starting...
+2025-04-28 17:29:22,180 - INFO - run_cut_and_save_audio
+2025-04-28 17:29:56,977 - INFO - Completed task 'Preprocessing completed': current_rss 132.30 MB, time 71.17s
+2025-04-28 17:29:56,978 - INFO - Speech to text...

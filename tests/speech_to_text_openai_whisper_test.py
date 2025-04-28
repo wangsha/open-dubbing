@@ -50,9 +50,9 @@ class TestSpeechToTextOpenAIWhisperTransformers:
         mock_client.audio.transcriptions.create.return_value = mock_response
 
         # Set the mock client
-        self.stt.client = mock_client
+        # self.stt.client = mock_client
 
-        filename = os.path.join(self.data_dir, "data/this_is_a_test.mp3")
+        filename = os.path.join(self.data_dir, "data/chinesepodcast.mp3")
         text = self.stt._transcribe(
             vocals_filepath=filename, source_language_iso_639_1="en"
         )

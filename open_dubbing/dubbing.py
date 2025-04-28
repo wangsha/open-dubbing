@@ -200,23 +200,35 @@ class Dubber:
         else:
             audio_file = self.input_file
 
-        demucs = Demucs()
-        demucs_command = demucs.build_demucs_command(
-            audio_file=audio_file,
-            output_directory=self.output_directory,
-            device=self.device,
-        )
-        logger().info(f"demucs_command = {demucs_command}")
-        demucs.execute_demucs_command(command=demucs_command)
-        audio_vocals_file, audio_background_file = (
-            demucs.assemble_split_audio_file_paths(command=demucs_command)
-        )
-        logger().info("create_pyannote_timestamps")
-        utterance_metadata = audio_processing.create_pyannote_timestamps(
-            audio_file=audio_file,
-            pipeline=self.pyannote_pipeline,
-            device=self.device,
-        )
+        smart_separate_audio = False
+        if smart_separate_audio:
+            demucs = Demucs()
+            demucs_command = demucs.build_demucs_command(
+                audio_file=audio_file,
+                output_directory=self.output_directory,
+                device=self.device,
+            )
+            logger().info(f"demucs_command = {demucs_command}")
+            demucs.execute_demucs_command(command=demucs_command)
+            audio_vocals_file, audio_background_file = (
+                demucs.assemble_split_audio_file_paths(command=demucs_command)
+            )
+            logger().info("create_pyannote_timestamps")
+            logger().info("create_pyannote_timestamps")
+            utterance_metadata = audio_processing.create_pyannote_timestamps(
+                audio_file=audio_file,
+                pipeline=self.pyannote_pipeline,
+                device=self.device,
+            )
+        else:
+            audio_vocals_file = audio_file
+            audio_background_file = audio_file
+
+            utterance_metadata = audio_processing.split_audio_by_size(
+                input_file=audio_file,
+                output_dir=self.output_directory,
+                target_size_mb=20,
+            )
         logger().info("run_cut_and_save_audio")
         utterance_metadata = audio_processing.run_cut_and_save_audio(
             utterance_metadata=utterance_metadata,
@@ -237,12 +249,14 @@ class Dubber:
         Returns:
             Updated utterance metadata with speaker information and transcriptions.
         """
-
-        media_file = (
-            self.preprocessing_output.video_file
-            if self.preprocessing_output.video_file
-            else self.preprocessing_output.audio_file
-        )
+        if self.preprocessing_output:
+            media_file = (
+                self.preprocessing_output.video_file
+                if self.preprocessing_output.video_file
+                else self.preprocessing_output.audio_file
+            )
+        else:
+            media_file = self.input_file
         utterance_metadata = self.stt.transcribe_audio_chunks(
             utterance_metadata=self.utterance_metadata,
             source_language=self.source_language,
@@ -509,9 +523,10 @@ class Dubber:
         )
 
         task_start_time = time.time()
-
-        self.run_postprocessing()
-        self.run_generate_subtitles()
+        self.postprocessing_output = None
+        if self.preprocessing_output.video_file:
+            self.run_postprocessing()
+            self.run_generate_subtitles()
         self._save_utterances()
         self.run_cleaning()
         times["postprocessing"] = self.log_debug_task_and_getime(
