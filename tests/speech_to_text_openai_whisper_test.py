@@ -13,14 +13,20 @@
 # limitations under the License.
 
 import os
-from unittest.mock import patch, MagicMock
+
+from unittest.mock import MagicMock, patch
 
 from dotenv import load_dotenv
 
-from open_dubbing.speech_to_text_openai_whisper import SpeechToTextOpenAIWhisperTransformers
+from open_dubbing.speech_to_text_openai_whisper import (
+    SpeechToTextOpenAIWhisperTransformers,
+)
+
 load_dotenv()
 
-MODEL= "whisper-1"
+MODEL = "whisper-1"
+
+
 class TestSpeechToTextOpenAIWhisperTransformers:
 
     @classmethod
@@ -28,10 +34,12 @@ class TestSpeechToTextOpenAIWhisperTransformers:
         cls.data_dir = os.path.dirname(os.path.realpath(__file__))
         api_key = os.getenv("OPENAI_API_KEY")
         assert api_key is not None, "OPENAI_API_KEY not set in environment variables"
-        cls.stt = SpeechToTextOpenAIWhisperTransformers(api_key=api_key, model_name=MODEL)
+        cls.stt = SpeechToTextOpenAIWhisperTransformers(
+            api_key=api_key, model_name=MODEL
+        )
         cls.stt.load_model()
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_transcribe(self, mock_openai):
         # Setup mock response
         mock_client = MagicMock()
@@ -40,25 +48,25 @@ class TestSpeechToTextOpenAIWhisperTransformers:
         mock_response.text = "This is a test."
         mock_response.language = "english"
         mock_client.audio.transcriptions.create.return_value = mock_response
-        
+
         # Set the mock client
         self.stt.client = mock_client
-        
+
         filename = os.path.join(self.data_dir, "data/this_is_a_test.mp3")
         text = self.stt._transcribe(
             vocals_filepath=filename, source_language_iso_639_1="en"
         )
-        
+
         # Verify the API was called with correct parameters
         mock_client.audio.transcriptions.create.assert_called_once()
         call_args = mock_client.audio.transcriptions.create.call_args[1]
         assert call_args["model"] == MODEL
         assert call_args["language"] == "en"
-        
+
         # Verify the result
         assert text.strip() == "This is a test."
 
-    @patch('openai.OpenAI')
+    @patch("openai.OpenAI")
     def test_detect_language(self, mock_openai):
         # Setup mock response
         mock_client = MagicMock()

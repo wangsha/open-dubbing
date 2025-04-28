@@ -16,17 +16,27 @@ import array
 import os
 
 from openai import OpenAI
+from transformers.models.whisper.tokenization_whisper import LANGUAGES, TO_LANGUAGE_CODE
 
 from open_dubbing import logger
 from open_dubbing.pydub_audio_segment import AudioSegment
 from open_dubbing.speech_to_text import SpeechToText
-from transformers.models.whisper.tokenization_whisper import TO_LANGUAGE_CODE, LANGUAGES
 
 
 class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
 
-    def __init__(self, device='cpu', cpu_threads=0, model_name="gpt-4o-mini-transcribe", api_key=""):
-        assert model_name in ['gpt-4o-mini-transcribe', 'gpt-4o-transcribe', 'whisper-1'], "Invalid model name, supported models are: gpt-4o-mini-transcribe, gpt-4o-transcribe, whisper-1"
+    def __init__(
+        self,
+        device="cpu",
+        cpu_threads=0,
+        model_name="gpt-4o-mini-transcribe",
+        api_key="",
+    ):
+        assert model_name in [
+            "gpt-4o-mini-transcribe",
+            "gpt-4o-transcribe",
+            "whisper-1",
+        ], "Invalid model name, supported models are: gpt-4o-mini-transcribe, gpt-4o-transcribe, whisper-1"
         super().__init__(device=device, model_name=model_name, cpu_threads=cpu_threads)
         self.client = OpenAI(api_key=api_key)
 
@@ -43,7 +53,7 @@ class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
         logger().debug(
             f"speech_to_text_openai_whisper._transcribe. file: {vocals_filepath}, language: {source_language_iso_639_1}"
         )
-        
+
         # Open the audio file
         with open(vocals_filepath, "rb") as audio_file:
             # Call the OpenAI API to transcribe the audio
@@ -51,11 +61,11 @@ class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
                 model=self.model_name,
                 file=audio_file,
                 language=source_language_iso_639_1,
-                response_format="verbose_json"
+                response_format="verbose_json",
             )
-        
+
         transcription = response.text
-        
+
         logger().debug(
             f"speech_to_text_openai_whisper._transcribe. transcription: {transcription}, file {vocals_filepath}"
         )
@@ -79,7 +89,7 @@ class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
                 response = self.client.audio.transcriptions.create(
                     model=self.model_name,
                     file=audio_file,
-                    response_format="verbose_json"
+                    response_format="verbose_json",
                 )
 
             # Extract language from response
