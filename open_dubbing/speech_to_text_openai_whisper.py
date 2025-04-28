@@ -36,7 +36,7 @@ class SpeechToTextOpenAIWhisperTransformers(SpeechToText):
             "gpt-4o-mini-transcribe",
             "gpt-4o-transcribe",
             "whisper-1",
-        ], "Invalid model name, supported models are: gpt-4o-mini-transcribe, gpt-4o-transcribe, whisper-1"
+        ], f"Invalid model name, supported models are: gpt-4o-mini-transcribe, gpt-4o-transcribe, whisper-1, got {model_name}"
         super().__init__(device=device, model_name=model_name, cpu_threads=cpu_threads)
         self.client = OpenAI(api_key=api_key)
 

@@ -26,7 +26,7 @@ class TranslationOpenAI(Translation):
     """
 
     def __init__(
-        self, device="cpu", model_name="gpt-4o", api_key="", prompt_template=None
+        self, device="cpu", model_name="gpt-4o-mini", api_key="", prompt_template=None
     ):
         """
         Initialize the TranslationOpenAI class.

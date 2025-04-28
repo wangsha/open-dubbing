@@ -18,6 +18,9 @@ WHISPER_MODEL_NAMES = [
     "medium",
     "large-v2",
     "large-v3",
+    "whisper-1",
+    "gpt-4o-mini-transcribe",
+    "gpt-4o-transcribe",
 ]
 
 
@@ -108,7 +111,7 @@ class CommandLine:
             "--translator",
             type=str,
             default="nllb",
-            choices=["nllb", "apertium"],
+            choices=["nllb", "apertium", "openai"],
             help=(
                 "Text to Speech engine to use. Choices are:\n"
                 "'nllb': Meta's no Language Left Behind (NLLB).\n"
@@ -153,7 +156,7 @@ class CommandLine:
 
         parser.add_argument(
             "--whisper_model",
-            default="large-v3",
+            default="whisper-1",
             choices=WHISPER_MODEL_NAMES,
             help="name of the OpenAI Whisper speech to text model size to use",
         )

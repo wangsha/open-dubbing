@@ -18,3 +18,5 @@ publish-release:
 	python setup.py sdist bdist_wheel
 	python -m  twine upload -u "__token__" -p "${PYPI_API_TOKEN}" --repository-url https://upload.pypi.org/legacy/ dist/*
 
+run:
+	export PYTHONPATH="${PYTHONPATH}:."; pipenv run python open_dubbing/main.py --tts openai --stt openai-whisper --translator openai --dubbed_subtitles --original_subtitles   --input_file e2e-tests/french_audio/frenchaudio.mp3 --target_language=eng --output_directory e2e-tests/french_audio

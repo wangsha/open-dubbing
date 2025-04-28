@@ -107,6 +107,7 @@ class Dubber:
         clean_intermediate_files: bool = False,
         original_subtitles: bool = False,
         dubbed_subtitles: bool = False,
+        is_video: bool = False,
     ) -> None:
         self._input_file = input_file
         self.output_directory = output_directory
@@ -126,6 +127,7 @@ class Dubber:
         self.preprocessing_output = None
         self.original_subtitles = original_subtitles
         self.dubbed_subtitles = dubbed_subtitles
+        self.is_video = is_video
 
         if cpu_threads > 0:
             torch.set_num_threads(cpu_threads)
@@ -189,25 +191,33 @@ class Dubber:
 
     def run_preprocessing(self) -> None:
         """Splits audio/video, applies DEMUCS, and segments audio into utterances with PyAnnote."""
-        video_file, audio_file = VideoProcessing.split_audio_video(
-            video_file=self.input_file, output_directory=self.output_directory
-        )
+        video_file, audio_file = None, None
+        if self.is_video:
+            logger().info("split_audio_video")
+            video_file, audio_file = VideoProcessing.split_audio_video(
+                video_file=self.input_file, output_directory=self.output_directory
+            )
+        else:
+            audio_file = self.input_file
+
         demucs = Demucs()
         demucs_command = demucs.build_demucs_command(
             audio_file=audio_file,
             output_directory=self.output_directory,
             device=self.device,
         )
+        logger().info(f"demucs_command = {demucs_command}")
         demucs.execute_demucs_command(command=demucs_command)
         audio_vocals_file, audio_background_file = (
             demucs.assemble_split_audio_file_paths(command=demucs_command)
         )
-
+        logger().info("create_pyannote_timestamps")
         utterance_metadata = audio_processing.create_pyannote_timestamps(
             audio_file=audio_file,
             pipeline=self.pyannote_pipeline,
             device=self.device,
         )
+        logger().info("run_cut_and_save_audio")
         utterance_metadata = audio_processing.run_cut_and_save_audio(
             utterance_metadata=utterance_metadata,
             audio_file=audio_file,

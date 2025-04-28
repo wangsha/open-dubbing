@@ -1,0 +1,4 @@
+/build
+/open_dubbing.egg-info
+*.pyc
+.env

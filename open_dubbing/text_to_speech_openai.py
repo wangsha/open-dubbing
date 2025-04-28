@@ -14,6 +14,7 @@
 
 from typing import List
 
+from iso639 import Lang
 from openai import OpenAI
 
 from open_dubbing import logger
@@ -25,8 +26,7 @@ class TextToSpeechOpenAI(TextToSpeech):
 
     def __init__(self, device="cpu", server="", api_key=""):
         super().__init__()
-        self.client = OpenAI()
-        self.client.api_key = api_key
+        self.client = OpenAI(api_key=api_key)
 
     def get_available_voices(self, language_code: str) -> List[Voice]:
 
@@ -72,77 +72,29 @@ class TextToSpeechOpenAI(TextToSpeech):
         logger().debug(
             f"text_to_speech_openai._convert_text_to_speech: assigned_voice: {assigned_voice}, output_filename: '{output_filename}'"
         )
-        response = self.client.audio.speech.create(
+        with self.client.with_streaming_response.audio.speech.create(
             model="tts-1",
             voice=assigned_voice,
             input=text,
-        )
-
-        response.stream_to_file(output_filename)
+        ) as response:
+            response.stream_to_file(output_filename)
 
         return output_filename
 
-    def get_languages(self):
-        languages = languages = [
-            "afr",
-            "ara",
-            "hye",
-            "aze",
-            "bel",
-            "bos",
-            "bul",
-            "cat",
-            "zho",
-            "hrv",
-            "ces",
-            "dan",
-            "nld",
-            "eng",
-            "est",
-            "fin",
-            "fra",
-            "glg",
-            "deu",
-            "ell",
-            "heb",
-            "hin",
-            "hun",
-            "isl",
-            "ind",
-            "ita",
-            "jpn",
-            "kan",
-            "kaz",
-            "kor",
-            "lav",
-            "lit",
-            "mkd",
-            "msa",
-            "mar",
-            "mri",
-            "nep",
-            "nor",
-            "fas",
-            "pol",
-            "por",
-            "ron",
-            "rus",
-            "srp",
-            "slk",
-            "slv",
-            "spa",
-            "swa",
-            "swe",
-            "tgl",
-            "tam",
-            "tha",
-            "tur",
-            "ukr",
-            "urd",
-            "vie",
-            "cym",
-        ]
+    def _get_iso_639_3(self, iso_639_1: str):
+        if iso_639_1 == "jw":
+            iso_639_1 = "jv"
 
-        languages = sorted(list(languages))
+        o = Lang(iso_639_1)
+        iso_639_3 = o.pt3
+        return iso_639_3
+
+    def get_languages(self):
+        from transformers.models.whisper.tokenization_whisper import LANGUAGES
+
+        languages = []
+        for language in LANGUAGES:
+            pt3 = self._get_iso_639_3(language)
+            languages.append(pt3)
         logger().debug(f"text_to_speech_openai.get_languages: {languages}")
-        return languages
+        return sorted(languages)

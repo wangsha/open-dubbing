@@ -1,0 +1,70 @@
+2025-04-28 13:58:50,878 - ERROR - Unsupported file format: mp3
+2025-04-28 13:59:40,549 - ERROR - Make sure that OpenAI library is installed by running 'pip install open-dubbing[openai]'
+2025-04-28 14:11:00,537 - INFO - Detected language 'zho'
+2025-04-28 14:15:29,560 - INFO - Detected language 'zho'
+2025-04-28 14:15:29,573 - ERROR - language pair '('zho', 'english')' is not supported by the translation system.
+2025-04-28 14:18:05,118 - INFO - Detected language 'zho'
+2025-04-28 14:18:05,135 - INFO - Processing 'e2e-tests/chinese-podcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 14:24:17,864 - INFO - Detected language 'zho'
+2025-04-28 14:24:17,872 - INFO - Processing 'e2e-tests/chinese-podcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 14:24:28,658 - INFO - Dubbing process starting...
+2025-04-28 14:24:28,658 - WARNING - The input file was renamed because the original name contained spaces, hyphens, or other incompatible characters. The updated input file is: e2e-tests/chinesepodcast.mp3
+2025-04-28 14:36:37,039 - INFO - Detected language 'zho'
+2025-04-28 14:36:37,051 - INFO - Processing 'e2e-tests/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 14:36:40,195 - INFO - Dubbing process starting...
+2025-04-28 14:49:56,352 - INFO - Detected language 'zho'
+2025-04-28 14:49:56,364 - INFO - Processing 'e2e-tests/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 14:49:58,636 - INFO - Dubbing process starting...
+2025-04-28 14:53:14,707 - INFO - Detected language 'zho'
+2025-04-28 14:53:14,721 - INFO - Processing 'e2e-tests/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 14:53:16,776 - INFO - Dubbing process starting...
+2025-04-28 14:53:16,777 - INFO - demucs_command
+2025-04-28 14:54:52,339 - INFO - create_pyannote_timestamps
+2025-04-28 15:03:27,374 - INFO - Detected language 'eng'
+2025-04-28 15:03:27,382 - INFO - Processing 'e2e-tests/englishvideo.mp4' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 15:03:29,439 - INFO - Dubbing process starting...
+2025-04-28 15:03:29,439 - INFO - split_audio_video
+2025-04-28 15:03:31,628 - INFO - demucs_command = /Users/aloha/Projects/open-dubbing/.venv/bin/python -m demucs.separate -o "e2e-tests" --device cpu --shifts 1 --overlap 0.25 -j 0 --two-stems vocals --mp3 --mp3-bitrate 320 --mp3-preset 2 "e2e-tests/englishvideo_audio.mp3"
+2025-04-28 15:03:39,692 - INFO - create_pyannote_timestamps
+2025-04-28 15:03:40,555 - INFO - run_cut_and_save_audio
+2025-04-28 15:03:41,074 - INFO - Completed task 'Preprocessing completed': current_rss 850.36 MB, time 11.63s
+2025-04-28 15:03:41,074 - INFO - Speech to text...
+2025-04-28 15:05:05,257 - INFO - Completed task 'Speech to text completed': current_rss 1467.95 MB, time 84.18s
+2025-04-28 15:05:06,600 - WARNING - translation_openai._translate_text. Could not complete translation API call, retrying attempt 1: Connection error.
+2025-04-28 15:05:13,071 - WARNING - translation_openai._translate_text. Could not complete translation API call, retrying attempt 2: Connection error.
+2025-04-28 15:08:36,711 - INFO - Detected language 'eng'
+2025-04-28 15:09:47,660 - INFO - Detected language 'eng'
+2025-04-28 15:10:19,942 - INFO - Detected language 'eng'
+2025-04-28 15:10:19,954 - INFO - Processing 'e2e-tests/englishvideo.mp4' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 15:10:22,081 - INFO - Dubbing process starting...
+2025-04-28 15:10:22,081 - INFO - split_audio_video
+2025-04-28 15:10:23,877 - INFO - demucs_command = /Users/aloha/Projects/open-dubbing/.venv/bin/python -m demucs.separate -o "e2e-tests" --device cpu --shifts 1 --overlap 0.25 -j 0 --two-stems vocals --mp3 --mp3-bitrate 320 --mp3-preset 2 "e2e-tests/englishvideo_audio.mp3"
+2025-04-28 15:10:31,843 - INFO - create_pyannote_timestamps
+2025-04-28 15:10:32,747 - INFO - run_cut_and_save_audio
+2025-04-28 15:10:33,286 - INFO - Completed task 'Preprocessing completed': current_rss 995.36 MB, time 11.20s
+2025-04-28 15:10:33,286 - INFO - Speech to text...
+2025-04-28 15:10:41,986 - INFO - Completed task 'Speech to text completed': current_rss 1507.61 MB, time 8.70s
+2025-04-28 15:10:44,305 - INFO - Completed task 'Translation completed': current_rss 1418.86 MB, time 2.32s
+2025-04-28 15:10:44,305 - INFO - text_to_speech.assign_voices. Returns: {'SPEAKER_00': 'alloy'}
+2025-04-28 15:10:49,830 - INFO - Completed task 'Text to speech completed': current_rss 1406.33 MB, time 5.52s
+2025-04-28 15:10:53,965 - INFO - Generated subtitles for languages ['eng', 'zho']
+2025-04-28 15:10:53,968 - INFO - Completed task 'Post processing completed': current_rss 1357.92 MB, time 4.14s
+2025-04-28 15:10:53,968 - INFO - Dubbing process finished.
+2025-04-28 15:10:53,968 - INFO - Total execution time: 31.89 secs
+2025-04-28 15:10:53,968 - INFO -  Task 'preprocessing' in 11.20 secs (35.14%)
+2025-04-28 15:10:53,968 - INFO -  Task 'stt' in 8.70 secs (27.28%)
+2025-04-28 15:10:53,968 - INFO -  Task 'translation' in 2.32 secs (7.27%)
+2025-04-28 15:10:53,968 - INFO -  Task 'tts' in 5.52 secs (17.33%)
+2025-04-28 15:10:53,968 - INFO -  Task 'postprocessing' in 4.14 secs (12.98%)
+2025-04-28 15:10:53,999 - INFO - Output files saved in: e2e-tests.
+2025-04-28 15:13:28,761 - INFO - Detected language 'zho'
+2025-04-28 15:13:28,774 - ERROR - language pair '('zho', 'zho')' is not supported by the translation system.
+2025-04-28 15:13:50,909 - INFO - Detected language 'zho'
+2025-04-28 15:13:50,918 - INFO - Processing 'e2e-tests/chinesepodcast.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 15:13:53,229 - INFO - Dubbing process starting...
+2025-04-28 15:13:53,230 - INFO - demucs_command = /Users/aloha/Projects/open-dubbing/.venv/bin/python -m demucs.separate -o "e2e-tests" --device cpu --shifts 1 --overlap 0.25 -j 0 --two-stems vocals --mp3 --mp3-bitrate 320 --mp3-preset 2 "e2e-tests/chinesepodcast.mp3"
+2025-04-28 15:15:28,022 - INFO - create_pyannote_timestamps
+2025-04-28 15:39:47,411 - INFO - Detected language 'fra'
+2025-04-28 15:39:47,420 - INFO - Processing 'e2e-tests/french_audio/frenchaudio.mp3' file with stt 'openai-whisper', tts 'openai' and device 'cpu'
+2025-04-28 15:39:50,024 - INFO - Dubbing process starting...
+2025-04-28 15:39:50,024 - INFO - demucs_command = /Users/aloha/Projects/open-dubbing/.venv/bin/python -m demucs.separate -o "e2e-tests/french_audio" --device cpu --shifts 1 --overlap 0.25 -j 0 --two-stems vocals --mp3 --mp3-bitrate 320 --mp3-preset 2 "e2e-tests/french_audio/frenchaudio.mp3"

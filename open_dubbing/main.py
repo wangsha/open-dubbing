@@ -39,10 +39,11 @@ from open_dubbing.text_to_speech_edge import TextToSpeechEdge
 from open_dubbing.text_to_speech_mms import TextToSpeechMMS
 from open_dubbing.translation_apertium import TranslationApertium
 from open_dubbing.translation_nllb import TranslationNLLB
+from open_dubbing.translation_openai import TranslationOpenAI
 
 
 def _init_logging(log_level):
-    logging.basicConfig(level=logging.ERROR)  # Suppress third-party loggers
+    logging.basicConfig(level=logging.DEBUG)  # Suppress third-party loggers
 
     # Create your application logger
     app_logger = logging.getLogger("open_dubbing")
@@ -109,9 +110,10 @@ def check_is_a_video(input_file: str):
     file_extension = file_extension.lower().lstrip(".")
 
     if file_extension in _ACCEPTED_VIDEO_FORMATS:
-        return
+        return True
     msg = f"Unsupported file format: {file_extension}"
-    log_error_and_exit(msg, ExitCode.INVALID_FILEFORMAT)
+    return False
+    # log_error_and_exit(msg, ExitCode.INVALID_FILEFORMAT)
 
 
 HUGGING_FACE_VARNAME = "HF_TOKEN"
@@ -185,12 +187,14 @@ def _get_selected_tts(
     elif selected_tts == "openai":
         try:
             from open_dubbing.text_to_speech_openai import TextToSpeechOpenAI
-        except Exception:
+        except Exception as e:
+            raise e
             msg = "Make sure that OpenAI library is installed by running 'pip install open-dubbing[openai]'"
             log_error_and_exit(msg, ExitCode.NO_OPENAI_TTS)
 
-        key = _get_openai_key(key=openai_api_key)
-        tts = TextToSpeechOpenAI(device=device, api_key=key)
+        tts = TextToSpeechOpenAI(
+            device=device, api_key=_get_openai_key(key=openai_api_key)
+        )
     else:
         raise ValueError(f"Invalid tts value {selected_tts}")
 
@@ -198,7 +202,11 @@ def _get_selected_tts(
 
 
 def _get_selected_translator(
-    translator: str, nllb_model: str, apertium_server: str, device: str
+    translator: str,
+    nllb_model: str,
+    apertium_server: str,
+    device: str,
+    openai_api_key: str,
 ):
     if translator == "nllb":
         translation = TranslationNLLB(device)
@@ -211,6 +219,10 @@ def _get_selected_translator(
 
         translation = TranslationApertium(device)
         translation.set_server(server)
+    elif translator == "openai":
+        translation = TranslationOpenAI(
+            device, api_key=_get_openai_key(key=openai_api_key)
+        )
     else:
         raise ValueError(f"Invalid translator value {translator}")
 
@@ -235,7 +247,7 @@ def main():
     args = CommandLine.read_parameters()
     _init_logging(args.log_level)
 
-    check_is_a_video(args.input_file)
+    is_video = check_is_a_video(args.input_file)
 
     hugging_face_token = get_token(args.hugging_face_token)
 
@@ -276,7 +288,8 @@ def main():
                 cpu_threads=args.cpu_threads,
                 api_key=key,
             )
-        except Exception:
+        except Exception as e:
+            raise e
             msg = "Make sure that OpenAI library is installed by running 'pip install open-dubbing[openai]'"
             log_error_and_exit(msg, ExitCode.NO_OPENAI_TTS)
 
@@ -300,7 +313,11 @@ def main():
         logger().info(f"Detected language '{source_language}'")
 
     translation = _get_selected_translator(
-        args.translator, args.nllb_model, args.apertium_server, args.device
+        args.translator,
+        args.nllb_model,
+        args.apertium_server,
+        args.device,
+        args.openai_api_key,
     )
 
     check_languages(
@@ -330,6 +347,7 @@ def main():
         clean_intermediate_files=args.clean_intermediate_files,
         original_subtitles=args.original_subtitles,
         dubbed_subtitles=args.dubbed_subtitles,
+        is_video=is_video,
     )
 
     logger().info(
